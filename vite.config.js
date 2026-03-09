@@ -12,9 +12,9 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'Attendly - Self Attendance Tracker',
+        name: 'Attendly - Class Attendance System',
         short_name: 'Attendly',
-        description: 'Track your attendance and stay on top of your goals.',
+        description: 'Track and manage class attendance efficiently.',
         theme_color: '#0ea5e9',
         background_color: '#0f172a',
         display: 'standalone',
