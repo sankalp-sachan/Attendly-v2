@@ -151,131 +151,155 @@ const TeacherDashboard = () => {
     const totalNotifications = totalPendingJoinRequests + totalPendingCorrections;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-10 page-transition">
-            <div className="max-w-7xl mx-auto">
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-                    <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 bg-primary-600 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-primary-500/30 transform -rotate-12">
-                            <Shield className="w-8 h-8" />
+        <div className="min-h-screen relative bg-[#020617] p-4 md:p-8 lg:p-10 overflow-x-hidden font-sans">
+            {/* Cinematic Background Atmosphere */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <motion.div
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.15, 0.25, 0.15]
+                    }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-[-5%] right-[-5%] w-[45%] h-[45%] bg-primary-600/10 blur-[130px] rounded-full"
+                />
+                <motion.div
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.2, 0.3, 0.2]
+                    }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute bottom-[-5%] left-[-5%] w-[45%] h-[45%] bg-indigo-600/10 blur-[130px] rounded-full"
+                />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
+            </div>
+
+            <div className="max-w-7xl mx-auto relative z-10">
+                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-primary-600 rounded-2xl md:rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl shadow-primary-500/30 transform -rotate-12 translate-y-[-2px]">
+                            <Shield className="w-6 h-6 md:w-7 md:h-7" />
                         </div>
                         <div>
-                            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">Attendly</h1>
-                            <div className="flex items-center gap-2 mt-1">
-                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                                <p className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">
-                                    Prof. {user.name} • Faculty
+                            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase mb-[-4px]">Attendly</h1>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                <p className="text-slate-500 font-bold uppercase text-[8px] md:text-[9px] tracking-[0.2em] opacity-80">
+                                    Prof. {user.name} • Faculty Panel
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 w-full md:w-auto">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button
                             onClick={() => setShowNotificationsModal(true)}
-                            className="relative p-4 rounded-2xl bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 shadow-xl border border-slate-100 dark:border-white/5 transition-all group"
+                            className="relative p-3.5 md:p-4 rounded-xl md:rounded-2xl bg-white/5 text-slate-400 hover:text-primary-400 border border-white/5 transition-all group"
                         >
-                            <Bell className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                            <Bell className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" />
                             {totalNotifications > 0 && (
-                                <span className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full ring-4 ring-white dark:ring-slate-900 animate-pulse" />
+                                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-4 ring-slate-900 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]" />
                             )}
                         </button>
                         <button
                             onClick={() => setShowCreateModal(true)}
-                            className="btn-primary flex-1 md:flex-none px-8"
+                            className="btn-primary flex-1 sm:flex-none px-6 py-3.5 md:px-8 md:py-4 text-sm md:text-base rounded-xl md:rounded-2xl uppercase font-black tracking-widest shadow-2xl shadow-primary-500/20"
                         >
-                            <Plus className="w-5 h-5" />
-                            <span>Create Class</span>
+                            <Plus className="w-4 h-4 md:w-5 md:h-5" />
+                            <span>Launch Class</span>
                         </button>
-                        <button onClick={logout} className="p-4 rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 border border-red-500/20">
-                            <LogOut className="w-6 h-6" />
+                        <button onClick={logout} className="p-3.5 md:p-4 rounded-xl md:rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-300 border border-rose-500/20">
+                            <LogOut className="w-5 h-5 md:w-6 md:h-6" />
                         </button>
                     </div>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb:12 md:mb-16">
                     <motion.div
                         whileHover={{ y: -5 }}
-                        className="card bg-gradient-to-br from-indigo-600 to-violet-700 text-white border-none relative overflow-hidden group shadow-2xl shadow-indigo-500/20"
+                        className="card bg-gradient-to-br from-indigo-600/90 to-violet-700/90 text-white border-none relative overflow-hidden group p-6 md:p-8 shadow-2xl shadow-indigo-500/10"
                     >
-                        <ClipboardList className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform duration-700" />
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 mb-2">Total Classes</h3>
-                        <p className="text-5xl font-black tracking-tighter">{classes.length}</p>
-                        <p className="mt-4 text-[10px] font-black uppercase tracking-widest bg-white/10 w-fit px-3 py-1 rounded-full">Managed by you</p>
+                        <ClipboardList className="absolute -right-4 -bottom-4 w-28 md:w-32 h-28 md:h-32 opacity-10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] opacity-70 mb-2">Academic Modules</h3>
+                        <p className="text-4xl md:text-5xl font-black tracking-tighter">{classes.length}</p>
+                        <p className="mt-4 text-[9px] font-black uppercase tracking-widest bg-white/10 w-fit px-3 py-1 rounded-full border border-white/10">Active Classrooms</p>
                     </motion.div>
 
                     <motion.div
                         whileHover={{ y: -5 }}
-                        className="card dark:bg-slate-900 border-none relative overflow-hidden group shadow-xl"
+                        className="card bg-slate-900/40 border-white/5 relative overflow-hidden group p-6 md:p-8"
                     >
-                        <Users className="absolute -right-4 -bottom-4 w-32 h-32 text-emerald-500/10 group-hover:scale-110 transition-transform duration-700" />
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Total Students</h3>
-                        <p className="text-5xl font-black tracking-tighter dark:text-white">
+                        <Users className="absolute -right-4 -bottom-4 w-28 md:w-32 h-28 md:h-32 text-emerald-500/10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Student Synergy</h3>
+                        <p className="text-4xl md:text-5xl font-black tracking-tighter text-white">
                             {classes.reduce((acc, c) => acc + (c.students?.length || 0), 0)}
                         </p>
-                        <p className="mt-2 text-xs font-bold text-emerald-500 uppercase tracking-widest">Active Enrollment</p>
+                        <p className="mt-2 text-[10px] font-bold text-emerald-500 uppercase tracking-widest opacity-80">Connected Learners</p>
                     </motion.div>
 
                     <motion.div
                         whileHover={{ y: -5 }}
                         onClick={() => setShowNotificationsModal(true)}
-                        className="card dark:bg-slate-900 border-none relative overflow-hidden group shadow-xl cursor-pointer"
+                        className="card bg-slate-900/40 border-white/5 relative overflow-hidden group p-6 md:p-8 cursor-pointer hover:border-amber-500/30 transition-colors"
                     >
-                        <UserCheck className="absolute -right-4 -bottom-4 w-32 h-32 text-amber-500/10 group-hover:scale-110 transition-transform duration-700" />
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Pending Requests</h3>
-                        <p className="text-5xl font-black tracking-tighter dark:text-white">{totalNotifications}</p>
-                        <p className="mt-2 text-xs font-bold text-amber-500 uppercase tracking-widest">Action Required</p>
+                        <UserCheck className="absolute -right-4 -bottom-4 w-28 md:w-32 h-28 md:h-32 text-amber-500/10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Attention Required</h3>
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-4xl md:text-5xl font-black tracking-tighter text-white">{totalNotifications}</p>
+                            {totalNotifications > 0 && <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping shadow-[0_0_10px_rgba(244,63,94,0.5)]" />}
+                        </div>
+                        <p className="mt-2 text-[10px] font-bold text-amber-500 uppercase tracking-widest opacity-80">Pending Verifications</p>
                     </motion.div>
                 </div>
 
-                <div className="flex justify-between items-end mb-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
                     <div>
-                        <h2 className="text-3xl font-black dark:text-white tracking-tighter">Your Classrooms</h2>
-                        <p className="text-slate-400 text-sm font-medium mt-1">Manage attendance and student records for your courses</p>
+                        <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter">Your Classrooms</h2>
+                        <p className="text-slate-500 text-xs md:text-sm font-medium mt-1 uppercase tracking-wider opacity-60">Manage registers and academic footprints</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-20">
                     <AnimatePresence>
                         {classes.map((cls) => (
                             <motion.div
                                 key={cls._id}
                                 layout
-                                initial={{ opacity: 0, scale: 0.9 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 whileHover={{ y: -5 }}
-                                className="card group hover:shadow-2xl transition-all duration-500 dark:bg-slate-900/50 border-slate-100 dark:border-white/5 p-8 relative overflow-hidden"
+                                className="card group hover:shadow-2xl transition-all duration-500 bg-slate-900/40 border-white/5 p-6 md:p-8 relative overflow-hidden rounded-[2rem]"
                             >
-                                <div className="absolute top-0 left-0 w-1 h-full bg-primary-600 transition-all duration-500 group-hover:w-2" />
+                                <div className="absolute top-0 left-0 w-1 flex h-full bg-primary-600 transition-all duration-500 group-hover:w-2" />
 
                                 <div className="flex justify-between items-start mb-6">
-                                    <div>
-                                        <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">{cls.subject}</p>
+                                    <div className="flex-1">
+                                        <p className="text-[9px] font-black text-primary-400 uppercase tracking-widest mb-1 opacity-80">{cls.subject}</p>
                                         <h3
                                             onClick={() => navigate(`/teacher/classes/${cls._id}`)}
-                                            className="text-2xl font-black text-slate-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors tracking-tight"
+                                            className="text-xl md:text-2xl font-black text-white cursor-pointer hover:text-primary-400 transition-colors tracking-tight leading-tight line-clamp-1"
                                         >
                                             {cls.name}
                                         </h3>
                                     </div>
-                                    <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-white/5">
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">SEM</p>
-                                        <p className="text-lg font-black text-primary-600 leading-none mt-1 text-center">{cls.semester}</p>
+                                    <div className="min-w-[48px] p-2 md:p-3 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">SEM</p>
+                                        <p className="text-base md:text-lg font-black text-primary-400 leading-none mt-1">{cls.semester}</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-50 dark:bg-slate-950/50 p-4 rounded-3xl border border-slate-100 dark:border-white/5 mb-8 flex justify-between items-center group-hover:bg-primary-500/5 transition-colors">
+                                <div className="bg-black/20 p-4 rounded-3xl border border-white/5 mb-8 flex justify-between items-center group-hover:bg-primary-500/5 transition-colors">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Entry Code</span>
+                                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Entry Code</span>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-mono font-black text-slate-700 dark:text-slate-300 tracking-[0.2em]">{cls.classCode}</span>
+                                    <div className="flex items-center gap-4">
+                                        <span className="font-mono font-black text-slate-300 tracking-[0.2em] text-sm md:text-base">{cls.classCode}</span>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 navigator.clipboard.writeText(cls.classCode);
-                                                alert("Code copied!");
+                                                alert("Code copied to clipboard!");
                                             }}
-                                            className="p-2 rounded-xl text-slate-400 hover:text-primary-600 hover:bg-white dark:hover:bg-slate-900 transition-all shadow-sm"
+                                            className="p-2 rounded-xl text-slate-500 hover:text-primary-400 hover:bg-white/5 transition-all"
                                         >
                                             <Share2 className="w-4 h-4" />
                                         </button>
@@ -285,16 +309,16 @@ const TeacherDashboard = () => {
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => openAttendanceModal(cls)}
-                                        className="flex-1 btn-primary py-4 rounded-2xl text-xs flex items-center justify-center gap-2"
+                                        className="flex-1 btn-primary py-3.5 md:py-4 rounded-2xl text-[10px] md:text-xs flex items-center justify-center gap-2 uppercase font-black tracking-widest"
                                     >
                                         <ClipboardList className="w-4 h-4" />
-                                        Mark Attendance
+                                        Log Attendance
                                     </button>
                                     <button
                                         onClick={() => navigate(`/teacher/classes/${cls._id}`)}
-                                        className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary-600 transition-all border border-slate-200 dark:border-white/5 shadow-sm"
+                                        className="p-3.5 md:p-4 rounded-2xl bg-white/5 text-slate-500 hover:text-primary-400 transition-all border border-white/5 shadow-sm"
                                     >
-                                        <ArrowRight className="w-5 h-5" />
+                                        <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
                                     </button>
                                 </div>
                             </motion.div>
@@ -302,16 +326,20 @@ const TeacherDashboard = () => {
                     </AnimatePresence>
 
                     {classes.length === 0 && !loading && (
-                        <div className="col-span-full py-32 text-center animate-pulse">
-                            <div className="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-[3rem] flex items-center justify-center mx-auto mb-8 border border-slate-200/50 dark:border-white/5">
-                                <Plus className="w-10 h-10 text-slate-400" />
-                            </div>
-                            <h3 className="text-2xl font-black text-slate-400 tracking-tight">No classes yet</h3>
+                        <div className="col-span-full py-24 md:py-32 text-center">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="w-20 md:w-24 h-20 md:h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 border border-white/5"
+                            >
+                                <Plus className="w-10 h-10 text-slate-600" />
+                            </motion.div>
+                            <h3 className="text-2xl md:text-3xl font-black text-white/40 tracking-tight">System Ready for Classes</h3>
                             <button
                                 onClick={() => setShowCreateModal(true)}
-                                className="mt-6 btn-primary px-10 mx-auto"
+                                className="mt-8 btn-primary px-10 py-4 mx-auto uppercase tracking-widest font-black"
                             >
-                                Create your first class
+                                Start Your Legacy
                             </button>
                         </div>
                     )}

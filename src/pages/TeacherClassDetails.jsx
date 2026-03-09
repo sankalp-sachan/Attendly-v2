@@ -156,89 +156,161 @@ const TeacherClassDetails = () => {
     if (!classData) return <div className="p-8 text-center">Class not found</div>;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen relative bg-[#020617] p-4 md:p-8 lg:p-10 overflow-x-hidden font-sans">
+            {/* Cinematic Background Atmosphere */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <motion.div
+                    animate={{ scale: [1, 1.1, 1], opacity: [0.15, 0.25, 0.15] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary-600/10 blur-[130px] rounded-full"
+                />
+                <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[130px] rounded-full"
+                />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
+            </div>
+
+            <div className="max-w-7xl mx-auto relative z-10">
                 {/* Header */}
-                <header className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-8">
-                    <button
-                        onClick={() => navigate('/teacher')}
-                        className="p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
-                    >
-                        <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
-                    </button>
-                    <div className="flex-1">
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white">{classData?.name}</h1>
-                        <p className="text-slate-500 dark:text-slate-400 font-medium">
-                            {classData?.semester} • <span className="font-mono bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded text-sm">{classData?.classCode}</span>
-                        </p>
+                <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10">
+                    <div className="flex items-center gap-4 md:gap-6">
+                        <button
+                            onClick={() => navigate('/teacher')}
+                            className="p-3.5 md:p-4 rounded-2xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all shadow-2xl"
+                        >
+                            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
+                        </button>
+                        <div>
+                            <div className="flex items-center gap-4 mb-1">
+                                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase leading-none">
+                                    {classData?.name}
+                                </h1>
+                                <div className="h-6 w-[2px] bg-slate-800 hidden sm:block" />
+                                <span className="font-mono bg-primary-600/10 text-primary-400 border border-primary-500/20 px-3 py-1 rounded-lg text-[10px] md:text-xs font-black tracking-widest uppercase">
+                                    {classData?.classCode}
+                                </span>
+                            </div>
+                            <p className="text-slate-500 font-bold uppercase text-[9px] md:text-[10px] tracking-[0.2em] opacity-80">
+                                {classData?.semester} Registry • Faculty Management Node
+                            </p>
+                        </div>
                     </div>
+
                     {canMarkAttendance && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-3 w-full sm:w-auto">
                             <button
                                 onClick={openAttendanceModal}
-                                className="btn-primary"
+                                className="btn-primary flex-1 sm:flex-none px-8 py-4 rounded-2xl text-[10px] md:text-xs uppercase font-black tracking-widest shadow-2xl shadow-primary-500/20"
                             >
                                 <ClipboardList className="w-5 h-5" />
-                                <span>Mark Attendance</span>
+                                <span>Log Entry</span>
                             </button>
                         </div>
                     )}
                 </header>
 
                 {/* Tabs */}
-                <div className="flex gap-6 border-b border-slate-200 dark:border-slate-800 mb-8 overflow-x-auto">
+                <div className="flex gap-2 md:gap-4 mb-12 overflow-x-auto pb-4 scrollbar-none">
                     {['overview', 'students', 'history', 'analytics', 'reports'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`pb-4 px-2 text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab
-                                ? 'text-primary-600 border-b-2 border-primary-600'
-                                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                            className={`px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${activeTab === tab
+                                ? 'bg-primary-600 text-white border-primary-500 shadow-xl shadow-primary-500/20'
+                                : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
                                 }`}
                         >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab}
                         </button>
                     ))}
                 </div>
 
                 {/* Tab Content */}
-                <div className="min-h-[400px]">
+                <div className="min-h-[500px]">
                     {activeTab === 'overview' && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="card p-6 bg-white dark:bg-slate-900 border-none shadow-xl">
-                                <Users className="w-8 h-8 text-primary-500 mb-4" />
-                                <h3 className="text-sm font-bold uppercase text-slate-400 tracking-widest">Total Students</h3>
-                                <p className="text-3xl font-black dark:text-white">{classData.students?.length || 0}</p>
-                            </div>
-                            <div className="card p-6 bg-white dark:bg-slate-900 border-none shadow-xl">
-                                <Calendar className="w-8 h-8 text-emerald-500 mb-4" />
-                                <h3 className="text-sm font-bold uppercase text-slate-400 tracking-widest">Classes Conducted</h3>
-                                <p className="text-3xl font-black dark:text-white">{history.length}</p>
-                            </div>
-                            <div className="card p-6 bg-white dark:bg-slate-900 border-none shadow-xl">
-                                <CheckCircle className="w-8 h-8 text-indigo-500 mb-4" />
-                                <h3 className="text-sm font-bold uppercase text-slate-400 tracking-widest">Attendance Range</h3>
-                                <p className="text-3xl font-black dark:text-white">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                            <motion.div
+                                whileHover={{ y: -5 }}
+                                className="card p-8 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl"
+                            >
+                                <Users className="w-10 h-10 text-primary-400 mb-6 opacity-80" />
+                                <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2">Total Managed Learners</h3>
+                                <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">{classData.students?.length || 0}</p>
+                                <p className="mt-2 text-[10px] font-bold text-primary-400 uppercase tracking-widest opacity-80">Enrolled Registry</p>
+                            </motion.div>
+
+                            <motion.div
+                                whileHover={{ y: -5 }}
+                                className="card p-8 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl"
+                            >
+                                <Calendar className="w-10 h-10 text-emerald-400 mb-6 opacity-80" />
+                                <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2">Academic Checkpoints</h3>
+                                <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">{history.length}</p>
+                                <p className="mt-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest opacity-80">Sessions Logged</p>
+                            </motion.div>
+
+                            <motion.div
+                                whileHover={{ y: -5 }}
+                                className="card p-8 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl"
+                            >
+                                <CheckCircle className="w-10 h-10 text-indigo-400 mb-6 opacity-80" />
+                                <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2">Performance Spectrum</h3>
+                                <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">
                                     {analytics.studentStats.length > 0
                                         ? `${Math.min(...analytics.studentStats.map(s => s.percentage))}% - ${Math.max(...analytics.studentStats.map(s => s.percentage))}%`
                                         : '0%'}
                                 </p>
-                            </div>
-                            <div className="md:col-span-3 card p-6 bg-white dark:bg-slate-900 border-none shadow-xl">
-                                <h3 className="text-xl font-bold mb-6 dark:text-white flex items-center gap-2">
-                                    <BarChart2 className="w-6 h-6 text-primary-500" />
-                                    Attendance Trend
+                                <p className="mt-2 text-[10px] font-bold text-indigo-400 uppercase tracking-widest opacity-80">Engagement Range</p>
+                            </motion.div>
+
+                            <div className="md:col-span-3 card p-8 md:p-10 bg-slate-900/40 border-white/5 shadow-2xl relative overflow-hidden">
+                                <h3 className="text-xl md:text-2xl font-black mb-8 text-white tracking-tighter flex items-center gap-3">
+                                    <BarChart2 className="w-6 h-6 text-primary-400" />
+                                    Attendance Momentum
                                 </h3>
-                                <div className="h-[300px] w-full">
+                                <div className="h-[350px] w-full mt-4">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={analytics.dailyAnalytics}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                                            <XAxis dataKey="date" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
-                                            <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} unit="%" />
-                                            <Tooltip
-                                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            <defs>
+                                                <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#3b82f6" />
+                                                    <stop offset="100%" stopColor="#8b5cf6" />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                                            <XAxis
+                                                dataKey="date"
+                                                stroke="#475569"
+                                                fontSize={10}
+                                                tickLine={false}
+                                                axisLine={false}
+                                                dy={10}
+                                                tickFormatter={(str) => {
+                                                    const date = new Date(str);
+                                                    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                                                }}
                                             />
-                                            <Line type="monotone" dataKey="attendance" stroke="#2563EB" strokeWidth={4} dot={{ r: 6, fill: '#2563EB' }} activeDot={{ r: 8 }} />
+                                            <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} unit="%" dx={-10} />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: '#0f172a',
+                                                    borderRadius: '16px',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                                                    color: '#fff'
+                                                }}
+                                                itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="attendance"
+                                                stroke="url(#lineGradient)"
+                                                strokeWidth={5}
+                                                dot={{ r: 4, fill: '#020617', stroke: '#3b82f6', strokeWidth: 2 }}
+                                                activeDot={{ r: 8, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }}
+                                            />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -247,88 +319,93 @@ const TeacherClassDetails = () => {
                     )}
 
                     {activeTab === 'students' && (
-                        <div className="space-y-4">
-                            <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <div className="space-y-8">
+                            <div className="relative group max-w-2xl">
+                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-primary-400 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Search student by name..."
+                                    placeholder="Scan principal identities..."
                                     value={studentSearch}
                                     onChange={(e) => setStudentSearch(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
+                                    className="input-field pl-14 bg-slate-900/50"
                                 />
                             </div>
-                            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl overflow-hidden border border-slate-100 dark:border-slate-800">
+                            <div className="bg-slate-900/40 rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl overflow-x-auto scrollbar-none">
                                 {classData.students?.length === 0 ? (
-                                    <div className="p-10 text-center text-slate-500">No students enrolled yet.</div>
+                                    <div className="p-20 text-center">
+                                        <Users className="w-16 h-16 text-slate-800 mx-auto mb-4" />
+                                        <p className="text-slate-600 font-black uppercase tracking-widest text-sm">No learners synchronized</p>
+                                    </div>
                                 ) : (
-                                    <table className="w-full text-left">
-                                        <thead className="bg-slate-50 dark:bg-slate-800/50">
+                                    <table className="w-full text-left min-w-[800px]">
+                                        <thead className="bg-black/20">
                                             <tr>
-                                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Name</th>
-                                                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Attendance</th>
-                                                {canManageRoles && <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>}
+                                                <th className="px-8 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">Principal Identity</th>
+                                                <th className="px-8 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">Engagement Level</th>
+                                                {canManageRoles && <th className="px-8 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] text-right">Administrative Actions</th>}
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                        <tbody className="divide-y divide-white/5">
                                             {analytics.studentStats
                                                 .filter(s => s.name.toLowerCase().includes(studentSearch.toLowerCase()))
                                                 .map(student => (
-                                                    <tr key={student.studentId}>
-                                                        <td className="px-6 py-4">
-                                                            <div className="font-bold dark:text-white flex items-center gap-2">
-                                                                {student.name}
-                                                                {classData.CRs?.some(id => (id._id || id) === student.studentId) && <span className="bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full text-[10px] uppercase font-black">CR</span>}
-                                                                {classData.mentors?.some(id => (id._id || id) === student.studentId) && <span className="bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full text-[10px] uppercase font-black">Mentor</span>}
+                                                    <tr key={student.studentId} className="hover:bg-primary-500/[0.03] transition-colors group">
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 font-black border border-white/5 group-hover:text-primary-400 transition-colors uppercase">
+                                                                    {student.name.charAt(0)}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="font-black text-white text-base tracking-tight flex items-center gap-3">
+                                                                        {student.name}
+                                                                        <div className="flex gap-1.5">
+                                                                            {classData.CRs?.some(id => (id._id || id) === student.studentId) && (
+                                                                                <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-lg text-[8px] uppercase font-black tracking-widest">CR (REP)</span>
+                                                                            )}
+                                                                            {classData.mentors?.some(id => (id._id || id) === student.studentId) && (
+                                                                                <span className="bg-primary-500/10 text-primary-400 border border-primary-500/20 px-2 py-0.5 rounded-lg text-[8px] uppercase font-black tracking-widest">Mentor</span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Verified Academic Account</p>
+                                                                </div>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="w-full max-w-[100px] h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                                <div
-                                                                    className={`h-full rounded-full ${student.percentage < 75 ? 'bg-red-500' : 'bg-emerald-500'}`}
-                                                                    style={{ width: `${student.percentage}%` }}
-                                                                />
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-40 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: `${student.percentage}%` }}
+                                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                                        className={`h-full rounded-full ${student.percentage < 75 ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`}
+                                                                    />
+                                                                </div>
+                                                                <span className={`text-xs font-black tracking-tighter ${student.percentage < 75 ? 'text-rose-400' : 'text-emerald-400'}`}>{student.percentage}%</span>
                                                             </div>
-                                                            <span className={`text-xs font-bold mt-1 block ${student.percentage < 75 ? 'text-red-500' : 'text-emerald-500'}`}>{student.percentage}%</span>
                                                         </td>
                                                         {canManageRoles && (
-                                                            <td className="px-6 py-4 text-right">
-                                                                <div className="flex justify-end gap-2">
-                                                                    {classData.CRs?.some(id => (id._id || id) === student.studentId) ? (
-                                                                        <button
-                                                                            onClick={() => handleAssignRole(student.studentId, 'cr', 'remove')}
-                                                                            title="Remove CR"
-                                                                            className="p-2 rounded-xl bg-amber-500 text-white hover:bg-red-500 transition-colors shadow-lg shadow-amber-500/30 hover:shadow-red-500/30"
-                                                                        >
-                                                                            <Star className="w-4 h-4" />
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button
-                                                                            onClick={() => handleAssignRole(student.studentId, 'cr', 'assign')}
-                                                                            title="Assign CR"
-                                                                            className="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/10 text-amber-600 hover:bg-amber-100 transition-colors"
-                                                                        >
-                                                                            <Star className="w-4 h-4" />
-                                                                        </button>
-                                                                    )}
+                                                            <td className="px-8 py-6 text-right">
+                                                                <div className="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                                    <button
+                                                                        onClick={() => handleAssignRole(student.studentId, 'cr', classData.CRs?.some(id => (id._id || id) === student.studentId) ? 'remove' : 'assign')}
+                                                                        title={classData.CRs?.some(id => (id._id || id) === student.studentId) ? "Revoke CR" : "Promote to CR"}
+                                                                        className={`p-2.5 rounded-xl transition-all border ${classData.CRs?.some(id => (id._id || id) === student.studentId)
+                                                                            ? 'bg-amber-500/20 text-amber-500 border-amber-500/30'
+                                                                            : 'bg-white/5 text-slate-500 border-white/10 hover:text-amber-400 hover:bg-amber-400/10 hover:border-amber-400/20'}`}
+                                                                    >
+                                                                        <Star className={`w-4 h-4 ${classData.CRs?.some(id => (id._id || id) === student.studentId) ? 'fill-amber-500' : ''}`} />
+                                                                    </button>
 
-                                                                    {classData.mentors?.some(id => (id._id || id) === student.studentId) ? (
-                                                                        <button
-                                                                            onClick={() => handleAssignRole(student.studentId, 'mentor', 'remove')}
-                                                                            title="Remove Mentor"
-                                                                            className="p-2 rounded-xl bg-indigo-500 text-white hover:bg-red-500 transition-colors shadow-lg shadow-indigo-500/30 hover:shadow-red-500/30"
-                                                                        >
-                                                                            <ShieldCheck className="w-4 h-4" />
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button
-                                                                            onClick={() => handleAssignRole(student.studentId, 'mentor', 'assign')}
-                                                                            title="Assign Mentor"
-                                                                            className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/10 text-indigo-600 hover:bg-indigo-100 transition-colors"
-                                                                        >
-                                                                            <ShieldCheck className="w-4 h-4" />
-                                                                        </button>
-                                                                    )}
+                                                                    <button
+                                                                        onClick={() => handleAssignRole(student.studentId, 'mentor', classData.mentors?.some(id => (id._id || id) === student.studentId) ? 'remove' : 'assign')}
+                                                                        title={classData.mentors?.some(id => (id._id || id) === student.studentId) ? "Revoke Mentor" : "Promote to Mentor"}
+                                                                        className={`p-2.5 rounded-xl transition-all border ${classData.mentors?.some(id => (id._id || id) === student.studentId)
+                                                                            ? 'bg-primary-500/20 text-primary-400 border-primary-500/30'
+                                                                            : 'bg-white/5 text-slate-500 border-white/10 hover:text-primary-400 hover:bg-primary-400/10 hover:border-primary-400/20'}`}
+                                                                    >
+                                                                        <ShieldCheck className="w-4 h-4" />
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                         )}
@@ -342,55 +419,86 @@ const TeacherClassDetails = () => {
                     )}
 
                     {activeTab === 'analytics' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="card bg-white dark:bg-slate-900 border-none shadow-xl p-6">
-                                <h3 className="text-xl font-bold mb-6 dark:text-white">Individual Performance</h3>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="card bg-slate-900/40 border-white/5 shadow-2xl p-8"
+                            >
+                                <h3 className="text-xl font-black mb-8 text-white tracking-tighter flex items-center gap-3">
+                                    <BarChart2 className="w-5 h-5 text-primary-400" />
+                                    Identity Performance Index
+                                </h3>
                                 <div className="h-[400px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={analytics.studentStats} layout="vertical">
-                                            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E2E8F0" />
+                                            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#1e293b" />
                                             <XAxis type="number" hide />
-                                            <YAxis dataKey="name" type="category" width={100} stroke="#94A3B8" fontSize={10} axisLine={false} tickLine={false} />
-                                            <Tooltip />
-                                            <Bar dataKey="percentage" radius={[0, 4, 4, 0]} barSize={20}>
+                                            <YAxis dataKey="name" type="category" width={100} stroke="#475569" fontSize={9} axisLine={false} tickLine={false} />
+                                            <Tooltip
+                                                cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                                                contentStyle={{ backgroundColor: '#0f172a', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}
+                                            />
+                                            <Bar dataKey="percentage" radius={[0, 8, 8, 0]} barSize={16}>
                                                 {analytics.studentStats.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.percentage < 75 ? '#EF4444' : '#10B981'} />
+                                                    <Cell key={`cell-${index}`} fill={entry.percentage < 75 ? '#f43f5e' : '#10b981'} />
                                                 ))}
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
-                            </div>
-                            <div className="card bg-white dark:bg-slate-900 border-none shadow-xl p-6">
-                                <h3 className="text-xl font-bold mb-6 dark:text-white">Quick Stats</h3>
-                                <div className="space-y-6">
-                                    <div
-                                        onClick={() => {
-                                            setStatsModalData({ title: 'Critical (Below 75%)', type: 'critical', students: analytics.studentStats.filter(s => s.percentage < 75) });
-                                            setShowStatsModal(true);
-                                        }}
-                                        className="p-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-800 cursor-pointer hover:ring-2 ring-red-500 transition-all"
-                                    >
-                                        <div className="flex items-center gap-3 text-red-600 mb-2">
-                                            <AlertCircle className="w-5 h-5" />
-                                            <span className="font-bold">Critical (Below 75%)</span>
+                            </motion.div>
+
+                            <div className="space-y-6">
+                                <motion.div
+                                    whileHover={{ x: 10 }}
+                                    onClick={() => {
+                                        setStatsModalData({ title: 'Critical Personnel', type: 'critical', students: analytics.studentStats.filter(s => s.percentage < 75) });
+                                        setShowStatsModal(true);
+                                    }}
+                                    className="p-6 bg-rose-500/5 hover:bg-rose-500/10 rounded-[2rem] border border-rose-500/20 cursor-pointer transition-all flex items-center justify-between group"
+                                >
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/10 group-hover:scale-110 transition-transform">
+                                            <AlertCircle className="w-7 h-7" />
                                         </div>
-                                        <p className="text-3xl font-black text-red-600">{analytics.studentStats.filter(s => s.percentage < 75).length}</p>
-                                        <p className="text-xs text-red-500 font-medium">Students need immediate attention.</p>
+                                        <div>
+                                            <h4 className="font-black text-rose-400 uppercase tracking-widest text-xs mb-1">Status: Critical</h4>
+                                            <p className="text-3xl font-black text-white px-1 tracking-tighter">{analytics.studentStats.filter(s => s.percentage < 75).length}</p>
+                                        </div>
                                     </div>
-                                    <div
-                                        onClick={() => {
-                                            setStatsModalData({ title: 'Good Standing', type: 'good', students: analytics.studentStats.filter(s => s.percentage >= 75) });
-                                            setShowStatsModal(true);
-                                        }}
-                                        className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-800 cursor-pointer hover:ring-2 ring-emerald-500 transition-all"
-                                    >
-                                        <div className="flex items-center gap-3 text-emerald-600 mb-2">
-                                            <CheckCircle className="w-5 h-5" />
-                                            <span className="font-bold">Good Standing</span>
+                                    <Plus className="w-6 h-6 text-rose-500/40 group-hover:text-rose-500 transition-colors" />
+                                </motion.div>
+
+                                <motion.div
+                                    whileHover={{ x: 10 }}
+                                    onClick={() => {
+                                        setStatsModalData({ title: 'Elite Performance', type: 'good', students: analytics.studentStats.filter(s => s.percentage >= 75) });
+                                        setShowStatsModal(true);
+                                    }}
+                                    className="p-6 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-[2rem] border border-emerald-500/20 cursor-pointer transition-all flex items-center justify-between group"
+                                >
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10 group-hover:scale-110 transition-transform">
+                                            <CheckCircle className="w-7 h-7" />
                                         </div>
-                                        <p className="text-3xl font-black text-emerald-600">{analytics.studentStats.filter(s => s.percentage >= 75).length}</p>
-                                        <p className="text-xs text-emerald-500 font-medium">Students with healthy attendance.</p>
+                                        <div>
+                                            <h4 className="font-black text-emerald-400 uppercase tracking-widest text-xs mb-1">Status: Stable</h4>
+                                            <p className="text-3xl font-black text-white px-1 tracking-tighter">{analytics.studentStats.filter(s => s.percentage >= 75).length}</p>
+                                        </div>
+                                    </div>
+                                    <Plus className="w-6 h-6 text-emerald-500/40 group-hover:text-emerald-500 transition-colors" />
+                                </motion.div>
+
+                                <div className="card p-8 bg-slate-900/40 border-white/5 shadow-2xl">
+                                    <h3 className="text-sm font-black text-slate-500 uppercase tracking-[0.25em] mb-4">Class Intelligence</h3>
+                                    <div className="flex items-center gap-4 py-2 border-b border-white/5">
+                                        <div className="w-2 h-2 rounded-full bg-primary-500 shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
+                                        <span className="text-xs text-slate-400 font-bold">Average Engagement: <span className="text-white">{(analytics.studentStats.reduce((a, b) => a + b.percentage, 0) / (analytics.studentStats.length || 1)).toFixed(1)}%</span></span>
+                                    </div>
+                                    <div className="flex items-center gap-4 py-3">
+                                        <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_5px_rgba(99,102,241,0.5)]" />
+                                        <span className="text-xs text-slate-400 font-bold">Predicted Trend: <span className="text-white">Upward (Active)</span></span>
                                     </div>
                                 </div>
                             </div>
@@ -398,50 +506,78 @@ const TeacherClassDetails = () => {
                     )}
 
                     {activeTab === 'reports' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="card bg-white dark:bg-slate-900 border-none shadow-xl p-8 flex flex-col items-center text-center">
-                                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center mb-6">
-                                    <ClipboardList className="w-8 h-8" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 sm:px-0">
+                            <motion.div
+                                whileHover={{ y: -8 }}
+                                className="card bg-slate-900/40 border-white/5 shadow-2xl p-10 flex flex-col items-center text-center group"
+                            >
+                                <div className="w-20 h-20 bg-emerald-500/10 text-emerald-500 rounded-[2rem] flex items-center justify-center mb-8 border border-emerald-500/10 group-hover:scale-110 transition-transform">
+                                    <ClipboardList className="w-10 h-10" />
                                 </div>
-                                <h3 className="text-xl font-bold dark:text-white mb-2">Excel Export</h3>
-                                <p className="text-slate-500 dark:text-slate-400 mb-6 font-medium">Download the complete attendance sheet in Microsoft Excel format (.xlsx).</p>
-                                <button onClick={exportToExcel} className="w-full btn-secondary py-4 rounded-2xl flex items-center justify-center gap-2">
-                                    <Download className="w-5 h-5" />
-                                    Download Excel
+                                <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Structured Dataset</h3>
+                                <p className="text-slate-500 mb-8 font-bold text-sm leading-relaxed max-w-xs">Deploy the complete attendance architecture in Microsoft Excel compliant format.</p>
+                                <button onClick={exportToExcel} className="w-full btn-secondary py-4 rounded-2xl flex items-center justify-center gap-3 group/btn">
+                                    <Download className="w-5 h-5 group-hover/btn:translate-y-1 transition-transform" />
+                                    <span className="text-[10px] uppercase font-black tracking-widest">Download .XLSX</span>
                                 </button>
-                            </div>
-                            <div className="card bg-white dark:bg-slate-900 border-none shadow-xl p-8 flex flex-col items-center text-center">
-                                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-2xl flex items-center justify-center mb-6">
-                                    <Download className="w-8 h-8" />
+                            </motion.div>
+
+                            <motion.div
+                                whileHover={{ y: -8 }}
+                                className="card bg-slate-900/40 border-white/5 shadow-2xl p-10 flex flex-col items-center text-center group"
+                            >
+                                <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-[2rem] flex items-center justify-center mb-8 border border-rose-500/10 group-hover:scale-110 transition-transform">
+                                    <Download className="w-10 h-10" />
                                 </div>
-                                <h3 className="text-xl font-bold dark:text-white mb-2">PDF Report</h3>
-                                <p className="text-slate-500 dark:text-slate-400 mb-6 font-medium">Generate a professional PDF report with summaries and student list.</p>
-                                <button onClick={exportToPDF} className="w-full bg-red-600 text-white font-bold py-4 rounded-2xl hover:bg-red-700 transition flex items-center justify-center gap-2">
-                                    <Download className="w-5 h-5" />
-                                    Download PDF
+                                <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Executive Dossier</h3>
+                                <p className="text-slate-500 mb-8 font-bold text-sm leading-relaxed max-w-xs">Generate a professional, print-ready PDF audit containing visual insights and list.</p>
+                                <button onClick={exportToPDF} className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 transition-colors group/btn shadow-xl shadow-rose-600/20">
+                                    <Download className="w-5 h-5 group-hover/btn:translate-y-1 transition-transform" />
+                                    <span className="text-[10px] uppercase font-black tracking-widest">Export PDF Archive</span>
                                 </button>
-                            </div>
+                            </motion.div>
                         </div>
                     )}
 
                     {activeTab === 'history' && (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             {history.length === 0 ? (
-                                <div className="text-center py-10 text-slate-500">No attendance records found.</div>
+                                <div className="p-20 text-center">
+                                    <Clock className="w-16 h-16 text-slate-800 mx-auto mb-4 opacity-40" />
+                                    <p className="text-slate-600 font-black uppercase tracking-[0.25em] text-sm">Chronological void - No records</p>
+                                </div>
                             ) : (
-                                history.map(record => (
-                                    <div key={record._id} className="card p-4 flex justify-between items-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
-                                                <CheckCircle className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold dark:text-white">{new Date(record.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h4>
-                                                <p className="text-xs text-slate-500">{record.records.filter(r => r.status === 'Present').length} Present • {record.records.length} Total</p>
-                                            </div>
-                                        </div>
+                                <div className="bg-slate-900/40 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
+                                    <div className="divide-y divide-white/5">
+                                        {history.map(record => (
+                                            <motion.div
+                                                key={record._id}
+                                                whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+                                                className="p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 transition-colors group"
+                                            >
+                                                <div className="flex items-center gap-6">
+                                                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)] group-hover:scale-110 transition-transform">
+                                                        <CheckCircle className="w-7 h-7" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-black text-white text-lg tracking-tight mb-1">{new Date(record.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h4>
+                                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.15em] flex items-center gap-3">
+                                                            <span className="text-emerald-400/80">{record.records.filter(r => r.status === 'Present').length} Present Identities</span>
+                                                            <span className="w-1 h-1 bg-slate-800 rounded-full" />
+                                                            <span>{record.records.length} Total Population</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => navigate(`/teacher/classes/${classData._id}/attendance/${record._id}`)}
+                                                    className="px-6 py-2.5 rounded-xl border border-white/10 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-white/5 hover:text-white transition-all w-full sm:w-auto text-center"
+                                                >
+                                                    Review Log
+                                                </button>
+                                            </motion.div>
+                                        ))}
                                     </div>
-                                ))
+                                </div>
                             )}
                         </div>
                     )}
@@ -449,119 +585,178 @@ const TeacherClassDetails = () => {
             </div>
 
             {/* Attendance Modal */}
-            {showAttendanceModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[32px] p-8 shadow-2xl max-h-[80vh] flex flex-col">
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <h2 className="text-2xl font-black dark:text-white mb-1">Mark Attendance</h2>
-                                <p className="text-slate-500 dark:text-slate-400 font-medium">{classData.name}</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <button onClick={markAllHoliday} className="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 font-bold rounded-xl text-xs hover:bg-amber-200 transition-colors uppercase tracking-widest">
-                                    Mark Holiday
-                                </button>
-                                <button onClick={() => setShowAttendanceModal(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
-                                    <XCircle className="w-6 h-6 text-slate-400" />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="mb-6 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
-                            <label className="text-sm font-bold text-slate-500 uppercase tracking-widest">Date:</label>
-                            <input
-                                type="date"
-                                value={attendanceDate}
-                                max={new Date().toISOString().split('T')[0]}
-                                onChange={(e) => setAttendanceDate(e.target.value)}
-                                className="bg-transparent font-bold text-slate-900 dark:text-white outline-none text-right"
-                            />
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto min-h-0 space-y-3 mb-6 pr-2">
-                            {classData.students?.length === 0 ? (
-                                <p className="text-center text-slate-500 py-10">No students enrolled in this class yet.</p>
-                            ) : (
-                                classData.students?.map(student => (
-                                    <div
-                                        key={student._id}
-                                        className={`flex items-center justify-between p-4 rounded-2xl transition-all border ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800' : attendanceRecords[student._id] === 'Absent' ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'}`}
+            <AnimatePresence>
+                {showAttendanceModal && (
+                    <div className="fixed inset-0 flex items-center justify-center z-[100] p-4 md:p-10">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowAttendanceModal(false)}
+                            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-3xl rounded-[2.5rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative z-10 flex flex-col max-h-[90vh] overflow-hidden"
+                        >
+                            <div className="p-8 md:p-10 border-b border-white/5 flex justify-between items-start shrink-0">
+                                <div>
+                                    <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1 uppercase">Log Engagement</h2>
+                                    <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em]">{classData.name} • Session Registry</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        onClick={markAllHoliday}
+                                        className="px-5 py-2.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 font-black rounded-xl text-[9px] hover:bg-amber-500/20 transition-all uppercase tracking-widest"
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-100 text-emerald-600' : attendanceRecords[student._id] === 'Absent' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-                                                {student?.name?.charAt(0) || '?'}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold dark:text-white">{student.name}</p>
-                                                <p className="text-xs text-slate-500">{student.email}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Present' }))}
-                                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'}`}
-                                            >
-                                                Present
-                                            </button>
-                                            <button
-                                                onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Absent' }))}
-                                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Absent' ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'}`}
-                                            >
-                                                Absent
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                                        Mark Global Holiday
+                                    </button>
+                                    <button
+                                        onClick={() => setShowAttendanceModal(false)}
+                                        className="p-3 rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-all border border-transparent hover:border-white/10"
+                                    >
+                                        <XCircle className="w-6 h-6" />
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <button
-                                onClick={handleSaveAttendance}
-                                disabled={classData.students?.length === 0 || isSaving}
-                                className="w-full btn-primary py-4 rounded-2xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                                {isSaving ? "Saving..." : "Save Attendance record"}
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                            <div className="p-8 md:px-10 py-6 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Chronological Timestamp</span>
+                                <div className="relative group w-full sm:w-auto">
+                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400" />
+                                    <input
+                                        type="date"
+                                        value={attendanceDate}
+                                        max={new Date().toISOString().split('T')[0]}
+                                        onChange={(e) => setAttendanceDate(e.target.value)}
+                                        className="bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-white font-black text-sm outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all w-full sm:w-64"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                {classData.students?.length === 0 ? (
+                                    <div className="p-20 text-center opacity-40 italic text-slate-500">No identities synchronized for this registry.</div>
+                                ) : (
+                                    classData.students?.map(student => (
+                                        <motion.div
+                                            key={student._id}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className={`flex flex-col sm:flex-row items-center justify-between p-5 rounded-2xl transition-all border ${attendanceRecords[student._id] === 'Present'
+                                                    ? 'bg-emerald-500/[0.03] border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)]'
+                                                    : attendanceRecords[student._id] === 'Absent'
+                                                        ? 'bg-rose-500/[0.03] border-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.05)]'
+                                                        : 'bg-amber-500/[0.03] border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.05)]'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-5 mb-4 sm:mb-0 w-full sm:w-auto">
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-base border transition-colors ${attendanceRecords[student._id] === 'Present'
+                                                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                        : attendanceRecords[student._id] === 'Absent'
+                                                            ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                                                            : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                    }`}>
+                                                    {student?.name?.charAt(0) || '?'}
+                                                </div>
+                                                <div>
+                                                    <p className="font-black text-white text-base tracking-tight">{student.name}</p>
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{student.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 w-full sm:w-auto">
+                                                <button
+                                                    onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Present' }))}
+                                                    className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${attendanceRecords[student._id] === 'Present'
+                                                            ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] scale-105'
+                                                            : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
+                                                >
+                                                    Present
+                                                </button>
+                                                <button
+                                                    onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Absent' }))}
+                                                    className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${attendanceRecords[student._id] === 'Absent'
+                                                            ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)] scale-105'
+                                                            : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
+                                                >
+                                                    Absent
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                )}
+                            </div>
+
+                            <div className="p-8 md:p-10 border-t border-white/5 shrink-0 bg-black/20">
+                                <button
+                                    onClick={handleSaveAttendance}
+                                    disabled={classData.students?.length === 0 || isSaving}
+                                    className="w-full btn-primary h-16 rounded-[1.5rem] flex items-center justify-center gap-4 disabled:opacity-30 disabled:cursor-not-allowed group"
+                                >
+                                    {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6 group-hover:scale-110 transition-transform" />}
+                                    <span className="text-[11px] font-black uppercase tracking-[0.3em]">Commit Entry to Block</span>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Quick Stats Modal */}
-            {showStatsModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[32px] p-8 shadow-2xl max-h-[80vh] flex flex-col">
-                        <div className="flex justify-between items-start mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
-                            <div>
-                                <h2 className={`text-2xl font-black mb-1 ${statsModalData.type === 'critical' ? 'text-red-500' : 'text-emerald-500'}`}>
-                                    {statsModalData.title}
-                                </h2>
-                                <p className="text-slate-500 dark:text-slate-400 font-medium">{statsModalData.students.length} Students</p>
+            <AnimatePresence>
+                {showStatsModal && (
+                    <div className="fixed inset-0 flex items-center justify-center z-[110] p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowStatsModal(false)}
+                            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] border border-white/10 shadow-2xl relative z-10 flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-8 border-b border-white/5 flex justify-between items-center shrink-0">
+                                <div>
+                                    <h2 className={`text-2xl font-black tracking-tighter uppercase ${statsModalData.type === 'critical' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                        {statsModalData.title}
+                                    </h2>
+                                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest">{statsModalData.students.length} Principal Identities Categorized</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowStatsModal(false)}
+                                    className="p-3 rounded-xl hover:bg-white/5 text-slate-400"
+                                >
+                                    <XCircle className="w-6 h-6" />
+                                </button>
                             </div>
-                            <button onClick={() => setShowStatsModal(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
-                                <XCircle className="w-6 h-6 text-slate-400" />
-                            </button>
-                        </div>
 
-                        <div className="flex-1 overflow-y-auto space-y-3 min-h-0 pr-2">
-                            {statsModalData.students?.length === 0 ? (
-                                <p className="text-center text-slate-500 py-10">No students in this category.</p>
-                            ) : (
-                                statsModalData.students.map(student => (
-                                    <div key={student.studentId} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-                                        <p className="font-bold dark:text-white text-sm">{student.name}</p>
-                                        <div className={`px-3 py-1 rounded-full text-xs font-black w-14 text-center ${statsModalData.type === 'critical' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                            {student.percentage}%
+                            <div className="flex-1 overflow-y-auto p-6 space-y-3 scrollbar-none">
+                                {statsModalData.students?.length === 0 ? (
+                                    <p className="text-center text-slate-600/50 italic py-10 uppercase font-black text-xs tracking-widest">Category Empty</p>
+                                ) : (
+                                    statsModalData.students.map(student => (
+                                        <div key={student.studentId} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-colors group">
+                                            <p className="font-black text-white text-sm tracking-tight">{student.name}</p>
+                                            <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black w-14 text-center border ${statsModalData.type === 'critical'
+                                                    ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                                                    : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                }`}>
+                                                {student.percentage}%
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                                    ))
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
