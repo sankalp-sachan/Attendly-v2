@@ -5,20 +5,28 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --primary: 221 83% 53%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --border: 214 32% 91%;
 }
 
 .dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  --background: 222 47% 4%;
+  --foreground: 210 40% 98%;
+  --primary: 217 91% 60%;
+  --card: 222 47% 6%;
+  --card-foreground: 210 40% 98%;
+  --border: 217 32% 12%;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
 }
@@ -30,29 +38,38 @@ h4,
 h5,
 h6 {
   font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 active:scale-95 transition-all duration-200 shadow-lg shadow-primary-500/20 flex items-center justify-center gap-2;
+    @apply px-6 py-3 bg-primary-600 text-white rounded-2xl font-bold hover:bg-primary-500 active:scale-95 transition-all duration-300 shadow-xl shadow-primary-500/25 flex items-center justify-center gap-2 border border-white/10;
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-slate-100 text-slate-900 rounded-xl font-medium hover:bg-slate-200 active:scale-95 transition-all duration-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 flex items-center justify-center gap-2;
+    @apply px-6 py-3 bg-slate-100 text-slate-900 rounded-2xl font-bold hover:bg-slate-200 active:scale-95 transition-all duration-300 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 flex items-center justify-center gap-2 border border-slate-200/10 dark:border-white/5;
   }
 
   .card {
-    @apply bg-white dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300;
+    @apply bg-white dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/60 dark:border-white/5 rounded-3xl p-8 shadow-2xl shadow-slate-200/40 dark:shadow-none transition-all duration-500;
   }
 
-  .glass {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-white/20 dark:border-slate-800/20;
+  .card:hover {
+    @apply border-primary-500/20 shadow-primary-500/5;
+  }
+
+  .glass-premium {
+    @apply bg-white/40 dark:bg-slate-950/40 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-[0_20px_50px_rgba(0, 0, 0, 0.1)];
+  }
+
+  .input-field {
+    @apply w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-white/5 rounded-2xl focus:ring-2 focus:ring-primary-500/50 outline-none dark:text-white transition-all duration-300 font-medium placeholder:text-slate-400 dark:placeholder:text-slate-600;
   }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -60,42 +77,43 @@ h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 dark:bg-slate-700 rounded-full;
+  @apply bg-slate-300 dark:bg-slate-800 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-300 dark:bg-slate-600;
+  @apply bg-slate-400 dark:bg-slate-700;
 }
 
-/* Calendar transitions */
-.calendar-enter {
-  opacity: 0;
-  transform: scale(0.95);
+/* Luxury Transitions */
+@keyframes fadeInZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-.calendar-enter-active {
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 200ms, transform 200ms;
+.page-transition {
+  animation: fadeInZoom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Custom styles for the calendar days */
+/* Calendar Specific Styles */
 .day-present {
-  @apply bg-green-500 text-white shadow-lg shadow-green-500/30;
+  @apply bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 ring-2 ring-emerald-500/20;
 }
 
 .day-absent {
-  @apply bg-red-500 text-white shadow-lg shadow-red-500/30;
+  @apply bg-rose-500 text-white shadow-lg shadow-rose-500/40 ring-2 ring-rose-500/20;
 }
 
 .day-holiday {
-  @apply bg-amber-500 text-white shadow-lg shadow-amber-500/30;
+  @apply bg-amber-500 text-white shadow-lg shadow-amber-500/40 ring-2 ring-amber-500/20;
 }
 
 .day-disabled {
-  @apply bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed;
-}
-
-.day-future {
-  @apply opacity-30 cursor-not-allowed;
+  @apply opacity-20 grayscale;
 }

@@ -36,14 +36,15 @@ import AboutDeveloper from './pages/AboutDeveloper';
 import AboutApp from './pages/AboutApp';
 
 function App() {
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(() => {
+    // Check if splash has already been shown in this session (persists across refreshes)
+    return !sessionStorage.getItem('splash_shown');
+  });
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2500); // Show splash screen for 2.5 seconds
-    return () => clearTimeout(timer);
-  }, []);
+  const handleSplashFinish = () => {
+    sessionStorage.setItem('splash_shown', 'true');
+    setLoading(false);
+  };
 
   return (
     <AuthProvider>
@@ -53,7 +54,7 @@ function App() {
         <SessionWarning />
         <AnimatePresence mode="wait">
           {loading ? (
-            <SplashScreen key="splash" />
+            <SplashScreen key="splash" onFinish={handleSplashFinish} />
           ) : (
             <motion.div
               key="app"

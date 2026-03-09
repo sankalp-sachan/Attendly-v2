@@ -244,7 +244,7 @@ export const AttendanceProvider = ({ children }) => {
                         "Keep your streak alive! Join class. 🔥",
                         "Your future self will thank you for attending! 🚀",
                         "Success occurs when opportunity meets preparation. 🌟",
-                        "The beautiful thing about learning is that no one can take it away from you. 💡", 
+                        "The beautiful thing about learning is that no one can take it away from you. 💡",
                         "Education is the passport to the future. 🌍",
                         "Develop a passion for learning. If you do, you will never cease to grow. 🌱"
 

@@ -151,303 +151,427 @@ const TeacherDashboard = () => {
     const totalNotifications = totalPendingJoinRequests + totalPendingCorrections;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-10 page-transition">
             <div className="max-w-7xl mx-auto">
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
-                            <Shield className="w-6 h-6" />
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 bg-primary-600 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-primary-500/30 transform -rotate-12">
+                            <Shield className="w-8 h-8" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-slate-900 dark:text-white">Teacher Dashboard</h1>
-                            <p className="text-slate-500 dark:text-slate-400 font-medium">Prof. {user.name} • {user.department?.name || 'Faculty'}</p>
+                            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">Attendly</h1>
+                            <div className="flex items-center gap-2 mt-1">
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                <p className="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">
+                                    Prof. {user.name} • Faculty
+                                </p>
+                            </div>
                         </div>
                     </div>
+
                     <div className="flex items-center gap-4 w-full md:w-auto">
                         <button
                             onClick={() => setShowNotificationsModal(true)}
-                            className="relative p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 shadow-sm border border-slate-200 dark:border-slate-800 transition-all"
+                            className="relative p-4 rounded-2xl bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 shadow-xl border border-slate-100 dark:border-white/5 transition-all group"
                         >
-                            <Bell className="w-6 h-6" />
+                            <Bell className="w-6 h-6 group-hover:rotate-12 transition-transform" />
                             {totalNotifications > 0 && (
-                                <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
+                                <span className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full ring-4 ring-white dark:ring-slate-900 animate-pulse" />
                             )}
                         </button>
                         <button
                             onClick={() => setShowCreateModal(true)}
-                            className="btn-primary flex-1 md:flex-none"
+                            className="btn-primary flex-1 md:flex-none px-8"
                         >
                             <Plus className="w-5 h-5" />
                             <span>Create Class</span>
                         </button>
-                        <button onClick={logout} className="p-3 rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                        <button onClick={logout} className="p-4 rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 border border-red-500/20">
                             <LogOut className="w-6 h-6" />
                         </button>
                     </div>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div className="card p-6 border-none bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-indigo-500/20">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-white/20 rounded-lg"><ClipboardList className="w-6 h-6" /></div>
-                        </div>
-                        <h3 className="text-4xl font-black">{classes.length}</h3>
-                        <p className="opacity-80 font-bold uppercase text-xs tracking-widest mt-1">Active Classes</p>
-                    </div>
-                    <div className="card p-6 border-none bg-white dark:bg-slate-900 shadow-xl">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg"><Users className="w-6 h-6" /></div>
-                        </div>
-                        <h3 className="text-4xl font-black dark:text-white">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <motion.div
+                        whileHover={{ y: -5 }}
+                        className="card bg-gradient-to-br from-indigo-600 to-violet-700 text-white border-none relative overflow-hidden group shadow-2xl shadow-indigo-500/20"
+                    >
+                        <ClipboardList className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 mb-2">Total Classes</h3>
+                        <p className="text-5xl font-black tracking-tighter">{classes.length}</p>
+                        <p className="mt-4 text-[10px] font-black uppercase tracking-widest bg-white/10 w-fit px-3 py-1 rounded-full">Managed by you</p>
+                    </motion.div>
+
+                    <motion.div
+                        whileHover={{ y: -5 }}
+                        className="card dark:bg-slate-900 border-none relative overflow-hidden group shadow-xl"
+                    >
+                        <Users className="absolute -right-4 -bottom-4 w-32 h-32 text-emerald-500/10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Total Students</h3>
+                        <p className="text-5xl font-black tracking-tighter dark:text-white">
                             {classes.reduce((acc, c) => acc + (c.students?.length || 0), 0)}
-                        </h3>
-                        <p className="text-slate-400 font-bold uppercase text-xs tracking-widest mt-1">Total Students</p>
-                    </div>
-                    <div className="card p-6 border-none bg-white dark:bg-slate-900 shadow-xl cursor-pointer hover:ring-2 ring-primary-500 transition-all" onClick={() => setShowNotificationsModal(true)}>
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-lg"><UserCheck className="w-6 h-6" /></div>
-                            {totalNotifications > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">ACTION NEEDED</span>}
-                        </div>
-                        <h3 className="text-4xl font-black dark:text-white">{totalNotifications}</h3>
-                        <p className="text-slate-400 font-bold uppercase text-xs tracking-widest mt-1">Pending Actions</p>
+                        </p>
+                        <p className="mt-2 text-xs font-bold text-emerald-500 uppercase tracking-widest">Active Enrollment</p>
+                    </motion.div>
+
+                    <motion.div
+                        whileHover={{ y: -5 }}
+                        onClick={() => setShowNotificationsModal(true)}
+                        className="card dark:bg-slate-900 border-none relative overflow-hidden group shadow-xl cursor-pointer"
+                    >
+                        <UserCheck className="absolute -right-4 -bottom-4 w-32 h-32 text-amber-500/10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Pending Requests</h3>
+                        <p className="text-5xl font-black tracking-tighter dark:text-white">{totalNotifications}</p>
+                        <p className="mt-2 text-xs font-bold text-amber-500 uppercase tracking-widest">Action Required</p>
+                    </motion.div>
+                </div>
+
+                <div className="flex justify-between items-end mb-10">
+                    <div>
+                        <h2 className="text-3xl font-black dark:text-white tracking-tighter">Your Classrooms</h2>
+                        <p className="text-slate-400 text-sm font-medium mt-1">Manage attendance and student records for your courses</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
                     <AnimatePresence>
                         {classes.map((cls) => (
                             <motion.div
                                 key={cls._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="card group hover:shadow-2xl transition-all duration-300 border-t-4 border-t-primary-500 p-0 overflow-hidden"
+                                layout
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                whileHover={{ y: -5 }}
+                                className="card group hover:shadow-2xl transition-all duration-500 dark:bg-slate-900/50 border-slate-100 dark:border-white/5 p-8 relative overflow-hidden"
                             >
-                                <div className="p-6">
-                                    <h3
-                                        onClick={() => navigate(`/teacher/classes/${cls._id}`)}
-                                        className="text-xl font-bold text-slate-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors"
-                                    >
-                                        {cls.name}
-                                    </h3>
-                                    <p className="text-xs font-bold text-primary-600 uppercase tracking-widest">{cls.subject}</p>
-                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">Semester {cls.semester}</p>
-                                    <div className="mt-4 flex justify-between items-center bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Code</span>
-                                        <span className="font-mono font-black text-slate-700 dark:text-slate-300 tracking-wider">{cls.classCode}</span>
-                                    </div>
-                                    <div className="flex justify-between mt-4">
-                                        <button
-                                            onClick={() => openAttendanceModal(cls)}
-                                            className="flex-1 mr-2 py-2 rounded-xl bg-primary-600 text-white font-bold text-sm hover:bg-primary-700 transition"
+                                <div className="absolute top-0 left-0 w-1 h-full bg-primary-600 transition-all duration-500 group-hover:w-2" />
+
+                                <div className="flex justify-between items-start mb-6">
+                                    <div>
+                                        <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">{cls.subject}</p>
+                                        <h3
+                                            onClick={() => navigate(`/teacher/classes/${cls._id}`)}
+                                            className="text-2xl font-black text-slate-900 dark:text-white cursor-pointer hover:text-primary-600 transition-colors tracking-tight"
                                         >
-                                            Mark Attendance
-                                        </button>
+                                            {cls.name}
+                                        </h3>
+                                    </div>
+                                    <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-white/5">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">SEM</p>
+                                        <p className="text-lg font-black text-primary-600 leading-none mt-1 text-center">{cls.semester}</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-50 dark:bg-slate-950/50 p-4 rounded-3xl border border-slate-100 dark:border-white/5 mb-8 flex justify-between items-center group-hover:bg-primary-500/5 transition-colors">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Entry Code</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-mono font-black text-slate-700 dark:text-slate-300 tracking-[0.2em]">{cls.classCode}</span>
                                         <button
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                                e.stopPropagation();
                                                 navigator.clipboard.writeText(cls.classCode);
                                                 alert("Code copied!");
                                             }}
-                                            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-white transition"
+                                            className="p-2 rounded-xl text-slate-400 hover:text-primary-600 hover:bg-white dark:hover:bg-slate-900 transition-all shadow-sm"
                                         >
-                                            <Share2 className="w-5 h-5" />
+                                            <Share2 className="w-4 h-4" />
                                         </button>
                                     </div>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => openAttendanceModal(cls)}
+                                        className="flex-1 btn-primary py-4 rounded-2xl text-xs flex items-center justify-center gap-2"
+                                    >
+                                        <ClipboardList className="w-4 h-4" />
+                                        Mark Attendance
+                                    </button>
+                                    <button
+                                        onClick={() => navigate(`/teacher/classes/${cls._id}`)}
+                                        className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-primary-600 transition-all border border-slate-200 dark:border-white/5 shadow-sm"
+                                    >
+                                        <ArrowRight className="w-5 h-5" />
+                                    </button>
                                 </div>
                             </motion.div>
                         ))}
                     </AnimatePresence>
+
+                    {classes.length === 0 && !loading && (
+                        <div className="col-span-full py-32 text-center animate-pulse">
+                            <div className="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-[3rem] flex items-center justify-center mx-auto mb-8 border border-slate-200/50 dark:border-white/5">
+                                <Plus className="w-10 h-10 text-slate-400" />
+                            </div>
+                            <h3 className="text-2xl font-black text-slate-400 tracking-tight">No classes yet</h3>
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="mt-6 btn-primary px-10 mx-auto"
+                            >
+                                Create your first class
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Create Class Modal */}
-            {showCreateModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[32px] p-8 shadow-2xl">
-                        <h2 className="text-2xl font-black mb-6 dark:text-white">Create New Class</h2>
-                        <form onSubmit={handleCreateClass} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Class Name</label>
-                                <input type="text" required className="w-full px-5 py-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-primary-500 outline-none dark:text-white" placeholder="e.g. B.Tech Computer Science" value={newClass.name} onChange={(e) => setNewClass({ ...newClass, name: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Subject</label>
-                                <input type="text" required className="w-full px-5 py-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-primary-500 outline-none dark:text-white" placeholder="e.g. Advanced Mathematics" value={newClass.subject} onChange={(e) => setNewClass({ ...newClass, subject: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Semester</label>
-                                <input type="text" required className="w-full px-5 py-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-primary-500 outline-none dark:text-white" placeholder="e.g. 5th Semester" value={newClass.semester} onChange={(e) => setNewClass({ ...newClass, semester: e.target.value })} />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Target Attendance (%)</label>
-                                <input type="number" min="0" max="100" required className="w-full px-5 py-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-primary-500 outline-none dark:text-white" value={newClass.targetPercentage} onChange={(e) => setNewClass({ ...newClass, targetPercentage: e.target.value })} />
-                            </div>
-                            <div className="flex gap-3 mt-8">
-                                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-4 rounded-2xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 btn-primary rounded-2xl">Create Class</button>
-                            </div>
-                        </form>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Notifications Modal (Join + Correction Requests) */}
-            {showNotificationsModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[32px] p-8 shadow-2xl max-h-[80vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-black dark:text-white">Action Center</h2>
-                            <button onClick={() => setShowNotificationsModal(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><XCircle className="w-6 h-6 text-slate-400" /></button>
-                        </div>
-
-                        <div className="flex gap-4 border-b border-slate-100 dark:border-slate-800 mb-6">
-                            <button
-                                onClick={() => setActiveTab('join')}
-                                className={`pb-4 px-2 text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'join' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                                Join Requests ({totalPendingJoinRequests})
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('corrections')}
-                                className={`pb-4 px-2 text-sm font-bold uppercase tracking-widest transition-all ${activeTab === 'corrections' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                                Corrections ({totalPendingCorrections})
-                            </button>
-                        </div>
-
-                        <div className="space-y-6">
-                            {activeTab === 'join' && (
-                                <>
-                                    {classes.map(cls => (
-                                        cls.pendingStudents?.length > 0 && (
-                                            <div key={cls._id}>
-                                                <h3 className="font-bold text-primary-600 mb-3 text-sm uppercase tracking-widest">{cls.name}</h3>
-                                                <div className="space-y-3">
-                                                    {cls.pendingStudents.map(student => (
-                                                        <div key={student._id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                                                            <div>
-                                                                <p className="font-bold dark:text-white">{student.name}</p>
-                                                                <p className="text-xs text-slate-500">{student.email}</p>
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <button onClick={() => handleJoinAction(cls._id, student._id, 'approve')} className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl hover:bg-emerald-200 dark:hover:bg-emerald-800/50 transition-colors"><CheckCircle className="w-5 h-5" /></button>
-                                                                <button onClick={() => handleJoinAction(cls._id, student._id, 'reject')} className="p-2 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-xl hover:bg-red-200 dark:hover:bg-red-800/50 transition-colors"><XCircle className="w-5 h-5" /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )
-                                    ))}
-                                    {totalPendingJoinRequests === 0 && <div className="text-center py-10"><p className="text-slate-500 font-medium">No pending join requests.</p></div>}
-                                </>
-                            )}
-
-                            {activeTab === 'corrections' && (
-                                <>
-                                    {correctionRequests.map(req => (
-                                        <div key={req._id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-primary-600 bg-primary-50 dark:bg-primary-900/20 px-2 py-1 rounded-md">{req.class?.name}</span>
-                                                    <p className="font-bold dark:text-white mt-2">{req.student?.name}</p>
-                                                </div>
-                                                <span className="text-xs font-black text-slate-400">{new Date(req.date).toLocaleDateString()}</span>
-                                            </div>
-                                            <p className="text-xs text-slate-500 italic mb-4">"{req.reason}"</p>
-                                            <div className="flex gap-3">
-                                                <button onClick={() => handleCorrectionAction(req._id, 'approve')} className="flex-1 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition">Approve</button>
-                                                <button onClick={() => handleCorrectionAction(req._id, 'reject')} className="flex-1 py-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition">Reject</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {correctionRequests.length === 0 && <div className="text-center py-10"><p className="text-slate-500 font-medium">No pending correction requests.</p></div>}
-                                </>
-                            )}
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Attendance Modal */}
-            {showAttendanceModal && selectedClassForAttendance && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[32px] p-8 shadow-2xl max-h-[80vh] flex flex-col">
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <h2 className="text-2xl font-black dark:text-white mb-1">Mark Attendance</h2>
-                                <p className="text-slate-500 dark:text-slate-400 font-medium">{selectedClassForAttendance.name}</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <button onClick={markAllHoliday} className="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 font-bold rounded-xl text-xs hover:bg-amber-200 transition-colors uppercase tracking-widest">
-                                    Mark Holiday
-                                </button>
-                                <button onClick={() => setShowAttendanceModal(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+            <AnimatePresence>
+                {showCreateModal && (
+                    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] p-10 shadow-2xl relative border border-white/5"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary-600 to-indigo-600" />
+                            <div className="flex justify-between items-start mb-10">
+                                <div>
+                                    <h2 className="text-3xl font-black dark:text-white tracking-tighter">New Class</h2>
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Setup your course portal</p>
+                                </div>
+                                <button onClick={() => setShowCreateModal(false)} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:bg-slate-100 transition-colors">
                                     <XCircle className="w-6 h-6 text-slate-400" />
                                 </button>
                             </div>
-                        </div>
 
-                        <div className="mb-6 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
-                            <label className="text-sm font-bold text-slate-500 uppercase tracking-widest">Date:</label>
-                            <input
-                                type="date"
-                                value={attendanceDate}
-                                max={new Date().toISOString().split('T')[0]}
-                                onChange={(e) => setAttendanceDate(e.target.value)}
-                                className="bg-transparent font-bold text-slate-900 dark:text-white outline-none text-right"
-                            />
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto min-h-0 space-y-3 mb-6 pr-2">
-                            {selectedClassForAttendance.students?.length === 0 ? (
-                                <p className="text-center text-slate-500 py-10">No students enrolled in this class yet.</p>
-                            ) : (
-                                selectedClassForAttendance.students?.map(student => (
-                                    <div
-                                        key={student._id}
-                                        className={`flex items-center justify-between p-4 rounded-2xl transition-all border ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800' : attendanceRecords[student._id] === 'Absent' ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-100 text-emerald-600' : attendanceRecords[student._id] === 'Absent' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-                                                {student?.name?.charAt(0) || '?'}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold dark:text-white">{student.name}</p>
-                                                <p className="text-xs text-slate-500">{student.email}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Present' }))}
-                                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'}`}
-                                            >
-                                                Present
-                                            </button>
-                                            <button
-                                                onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Absent' }))}
-                                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Absent' ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'}`}
-                                            >
-                                                Absent
-                                            </button>
-                                        </div>
+                            <form onSubmit={handleCreateClass} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Class Name</label>
+                                    <input type="text" required className="input-field" placeholder="e.g. B.Tech Computer Science" value={newClass.name} onChange={(e) => setNewClass({ ...newClass, name: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subject</label>
+                                    <input type="text" required className="input-field" placeholder="e.g. Advanced Mathematics" value={newClass.subject} onChange={(e) => setNewClass({ ...newClass, subject: e.target.value })} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Semester</label>
+                                        <input type="text" required className="input-field" placeholder="e.g. 5th" value={newClass.semester} onChange={(e) => setNewClass({ ...newClass, semester: e.target.value })} />
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target (%)</label>
+                                        <input type="number" min="0" max="100" required className="input-field" value={newClass.targetPercentage} onChange={(e) => setNewClass({ ...newClass, targetPercentage: e.target.value })} />
+                                    </div>
+                                </div>
+                                <button type="submit" className="w-full btn-primary py-5 rounded-3xl text-lg shadow-xl shadow-primary-500/20 mt-4">
+                                    Launch Class
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
-                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <button
-                                onClick={handleSaveAttendance}
-                                disabled={selectedClassForAttendance.students?.length === 0 || isSaving}
-                                className="w-full btn-primary py-4 rounded-2xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                                {isSaving ? "Saving..." : "Save Attendance record"}
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+            {/* Notifications Modal */}
+            <AnimatePresence>
+                {showNotificationsModal && (
+                    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative border border-white/5 max-h-[85vh] flex flex-col"
+                        >
+                            <div className="flex justify-between items-center mb-10">
+                                <div>
+                                    <h2 className="text-3xl font-black dark:text-white tracking-tighter">Action Center</h2>
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Review pending requests</p>
+                                </div>
+                                <button onClick={() => setShowNotificationsModal(false)} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:bg-slate-100 transition-colors">
+                                    <XCircle className="w-6 h-6 text-slate-400" />
+                                </button>
+                            </div>
+
+                            <div className="flex gap-8 border-b dark:border-white/5 mb-8">
+                                <button
+                                    onClick={() => setActiveTab('join')}
+                                    className={`pb-4 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'join' ? 'text-primary-600' : 'text-slate-400'}`}
+                                >
+                                    Joins ({totalPendingJoinRequests})
+                                    {activeTab === 'join' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-600 rounded-full" />}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('corrections')}
+                                    className={`pb-4 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'corrections' ? 'text-primary-600' : 'text-slate-400'}`}
+                                >
+                                    Corrections ({totalPendingCorrections})
+                                    {activeTab === 'corrections' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary-600 rounded-full" />}
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+                                {activeTab === 'join' && (
+                                    <>
+                                        {classes.map(cls => (
+                                            cls.pendingStudents?.length > 0 && (
+                                                <div key={cls._id} className="space-y-4">
+                                                    <h3 className="font-black text-primary-600 text-[9px] uppercase tracking-widest ml-1">{cls.name}</h3>
+                                                    <div className="space-y-3">
+                                                        {cls.pendingStudents.map(student => (
+                                                            <div key={student._id} className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-950/50 rounded-3xl border border-slate-100 dark:border-white/5">
+                                                                <div>
+                                                                    <p className="font-black dark:text-white tracking-tight">{student.name}</p>
+                                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{student.email.split('@')[0]}</p>
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    <button onClick={() => handleJoinAction(cls._id, student._id, 'approve')} className="p-3 bg-emerald-500/10 text-emerald-600 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all"><CheckCircle className="w-5 h-5" /></button>
+                                                                    <button onClick={() => handleJoinAction(cls._id, student._id, 'reject')} className="p-3 bg-red-500/10 text-red-600 rounded-2xl hover:bg-red-500 hover:text-white transition-all"><XCircle className="w-5 h-5" /></button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )
+                                        ))}
+                                        {totalPendingJoinRequests === 0 && (
+                                            <div className="text-center py-20 opacity-50">
+                                                <Users className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                                                <p className="text-xs font-black uppercase tracking-widest">Inbox Zero</p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {activeTab === 'corrections' && (
+                                    <>
+                                        {correctionRequests.map(req => (
+                                            <div key={req._id} className="p-6 bg-slate-50 dark:bg-slate-950/50 rounded-[2rem] border border-slate-100 dark:border-white/5">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-primary-600 bg-primary-500/10 px-2 py-1 rounded-md">{req.class?.name}</span>
+                                                        <p className="font-black dark:text-white mt-2 text-lg tracking-tight">{req.student?.name}</p>
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">{new Date(req.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                                </div>
+                                                <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl mb-6 border border-slate-100 dark:border-white/5">
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed italic">"{req.reason}"</p>
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <button onClick={() => handleCorrectionAction(req._id, 'approve')} className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-500/20 transition-all">Approve</button>
+                                                    <button onClick={() => handleCorrectionAction(req._id, 'reject')} className="flex-1 py-4 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Reject</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {correctionRequests.length === 0 && (
+                                            <div className="text-center py-20 opacity-50">
+                                                <MessageCircle className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                                                <p className="text-xs font-black uppercase tracking-widest">No Requests</p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Attendance Modal */}
+            <AnimatePresence>
+                {showAttendanceModal && selectedClassForAttendance && (
+                    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl relative border border-white/5 max-h-[90vh] flex flex-col"
+                        >
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <h2 className="text-3xl font-black dark:text-white tracking-tighter">Attendance</h2>
+                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">{selectedClassForAttendance.name}</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button onClick={markAllHoliday} className="px-5 py-3 bg-amber-500/10 text-amber-600 font-black rounded-2xl text-[10px] hover:bg-amber-500 hover:text-white transition-all uppercase tracking-widest border border-amber-500/20">
+                                        Holiday
+                                    </button>
+                                    <button onClick={() => setShowAttendanceModal(false)} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/5 hover:bg-slate-100 transition-colors">
+                                        <XCircle className="w-6 h-6 text-slate-400" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mb-8 flex items-center justify-between bg-slate-50 dark:bg-slate-950/50 p-6 rounded-[2rem] border border-slate-100 dark:border-white/5">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Date</label>
+                                <div className="flex items-center gap-3">
+                                    <Calendar className="w-4 h-4 text-primary-600" />
+                                    <input
+                                        type="date"
+                                        value={attendanceDate}
+                                        max={new Date().toISOString().split('T')[0]}
+                                        onChange={(e) => setAttendanceDate(e.target.value)}
+                                        className="bg-transparent font-black text-slate-900 dark:text-white outline-none cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto min-h-0 space-y-4 mb-8 pr-2 scrollbar-none">
+                                {selectedClassForAttendance.students?.length === 0 ? (
+                                    <div className="text-center py-20 bg-slate-50 dark:bg-slate-950/50 rounded-[2rem] border border-dotted border-slate-300 dark:border-white/10">
+                                        <Users className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                                        <p className="text-xs font-black uppercase tracking-widest text-slate-400">Class is currently empty</p>
+                                    </div>
+                                ) : (
+                                    selectedClassForAttendance.students?.map(student => (
+                                        <div
+                                            key={student._id}
+                                            className={`flex items-center justify-between p-5 rounded-[2rem] transition-all border duration-500 group ${attendanceRecords[student._id] === 'Present'
+                                                ? 'bg-emerald-500/5 border-emerald-500/20'
+                                                : attendanceRecords[student._id] === 'Absent'
+                                                    ? 'bg-red-500/5 border-red-500/20'
+                                                    : 'bg-amber-500/5 border-amber-500/20'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-5">
+                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all duration-500 group-hover:scale-110 ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                                    : attendanceRecords[student._id] === 'Absent' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20'
+                                                        : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                                                    }`}>
+                                                    {student?.name?.charAt(0) || '?'}
+                                                </div>
+                                                <div>
+                                                    <p className="font-black dark:text-white tracking-tight text-lg">{student.name}</p>
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{student.rollNumber || student.email.split('@')[0]}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Present' }))}
+                                                    className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-600'}`}
+                                                >
+                                                    Present
+                                                </button>
+                                                <button
+                                                    onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Absent' }))}
+                                                    className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Absent' ? 'bg-red-500 text-white shadow-xl shadow-red-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-red-500/10 hover:text-red-600'}`}
+                                                >
+                                                    Absent
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            <div className="pt-8 border-t dark:border-white/5">
+                                <button
+                                    onClick={handleSaveAttendance}
+                                    disabled={selectedClassForAttendance.students?.length === 0 || isSaving}
+                                    className="w-full btn-primary py-6 rounded-[2rem] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group shadow-2xl shadow-primary-500/20 relative overflow-hidden"
+                                >
+                                    {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6 group-hover:scale-110 transition-transform" />}
+                                    <span className="text-lg font-black tracking-tight">{isSaving ? "Finalizing..." : "Submit Attendance"}</span>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

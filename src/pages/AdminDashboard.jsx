@@ -114,13 +114,54 @@ const AdminDashboard = () => {
             </header>
 
             <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8">
+                {/* Statistics Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ y: -5 }}
+                        className="card bg-gradient-to-br from-primary-600 to-indigo-700 text-white border-none relative overflow-hidden group shadow-2xl shadow-primary-500/20"
+                    >
+                        <Users className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 mb-2">Total Managed Users</h3>
+                        <p className="text-5xl font-black tracking-tighter">{users.length}</p>
+                        <p className="mt-4 text-[10px] font-black uppercase tracking-widest bg-white/10 w-fit px-3 py-1 rounded-full">Across all roles</p>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        whileHover={{ y: -5 }}
+                        className="card dark:bg-slate-900 border-none relative overflow-hidden group shadow-xl"
+                    >
+                        <Building className="absolute -right-4 -bottom-4 w-32 h-32 text-emerald-500/10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Departments</h3>
+                        <p className="text-5xl font-black tracking-tighter dark:text-white">{departments.length}</p>
+                        <p className="mt-2 text-xs font-bold text-emerald-500 uppercase tracking-widest">Active Academic Units</p>
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        whileHover={{ y: -5 }}
+                        className="card dark:bg-slate-900 border-none relative overflow-hidden group shadow-xl"
+                    >
+                        <Shield className="absolute -right-4 -bottom-4 w-32 h-32 text-amber-500/10 group-hover:scale-110 transition-transform duration-700" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">System Status</h3>
+                        <p className="text-5xl font-black tracking-tighter dark:text-white">Active</p>
+                        <p className="mt-2 text-xs font-bold text-amber-500 uppercase tracking-widest">Online & Secure</p>
+                    </motion.div>
+                </div>
+
                 {/* Dashboard Nav */}
-                <div className="flex gap-4 mb-8">
+                <div className="flex gap-4 mb-10 overflow-x-auto pb-2 scrollbar-none">
                     {['users', 'departments'].map((t) => (
                         <button
                             key={t}
                             onClick={() => setTab(t)}
-                            className={`px-6 py-3 rounded-2xl font-black transition-all capitalize ${tab === t ? 'bg-primary-600 text-white shadow-lg' : 'bg-white dark:bg-slate-900 text-slate-400'}`}
+                            className={`px-8 py-4 rounded-2xl font-black transition-all capitalize whitespace-nowrap ${tab === t ? 'bg-primary-600 text-white shadow-xl shadow-primary-500/20' : 'bg-white dark:bg-slate-900 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
                         >
                             {t}
                         </button>
@@ -128,85 +169,86 @@ const AdminDashboard = () => {
                 </div>
 
                 {tab === 'users' && (
-                    <div className="space-y-6">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-8">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="relative max-w-md w-full">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search users..."
+                                    placeholder="Search by name or email..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 rounded-2xl border-none outline-none focus:ring-2 focus:ring-primary-500 dark:text-white shadow-lg"
+                                    className="input-field pl-14"
                                 />
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-xl overflow-x-auto">
-                            <table className="w-full text-left border-collapse min-w-[800px]">
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border border-slate-100 dark:border-white/5 overflow-x-auto">
+                            <table className="w-full text-left border-collapse min-w-[900px]">
                                 <thead>
                                     <tr className="bg-slate-50 dark:bg-slate-800/50">
-                                        <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-16">Avatar</th>
-                                        <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">User Details</th>
-                                        <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Role Assigned</th>
-                                        <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Department</th>
-                                        <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Status</th>
-                                        <th className="px-6 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center w-24">Identify</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Profile & Credentials</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Role Level</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Academic Dept</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Access Control</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                                     {filteredUsers.map((u) => (
-                                        <tr key={u._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mx-auto">
-                                                    <UserIcon className="w-6 h-6" />
+                                        <tr key={u._id} className="hover:bg-slate-50/50 dark:hover:bg-primary-500/5 transition-colors group">
+                                            <td className="px-8 py-6 text-center">
+                                                <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mx-auto group-hover:scale-110 transition-transform duration-500">
+                                                    <UserIcon className="w-7 h-7" />
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <p className="font-bold dark:text-white leading-tight">{u.name}</p>
-                                                <p className="text-xs text-slate-500 leading-tight">{u.email}</p>
+                                            <td className="px-8 py-6">
+                                                <p className="font-black dark:text-white text-lg tracking-tight leading-none mb-1">{u.name}</p>
+                                                <p className="text-xs text-slate-500 font-medium">{u.email}</p>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-8 py-6">
                                                 <select
                                                     value={u.role}
                                                     onChange={(e) => handleUpdateUser(u._id, { role: e.target.value })}
-                                                    className="bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl text-xs font-black uppercase text-primary-600 outline-none w-full"
+                                                    className="bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-2xl text-[10px] font-black uppercase text-primary-600 outline-none w-fit border border-slate-100 dark:border-white/5 focus:ring-2 focus:ring-primary-500"
                                                 >
-                                                    <option value="student">Student</option>
-                                                    <option value="cr">CR</option>
-                                                    <option value="mentor">Mentor</option>
-                                                    <option value="teacher">Teacher</option>
-                                                    <option value="hod">HOD</option>
-                                                    <option value="assistant_admin">Assistant</option>
-                                                    <option value="admin">Admin</option>
+                                                    <option value="student">STUDENT</option>
+                                                    <option value="cr">CR (REP)</option>
+                                                    <option value="mentor">FACULTY MENTOR</option>
+                                                    <option value="teacher">PROFESSOR</option>
+                                                    <option value="hod">H.O.D</option>
+                                                    <option value="assistant_admin">SYSTEM ASST</option>
+                                                    <option value="admin">ROOT ADMIN</option>
                                                 </select>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-8 py-6">
                                                 <select
                                                     value={u.department?._id || u.department || ''}
                                                     onChange={(e) => handleUpdateUser(u._id, { department: e.target.value })}
-                                                    className="bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 outline-none w-full"
+                                                    className="bg-slate-50 dark:bg-slate-950 px-4 py-3 rounded-2xl text-[10px] font-black uppercase text-slate-600 dark:text-slate-400 outline-none w-full border border-slate-100 dark:border-white/5"
                                                 >
-                                                    <option value="">None</option>
+                                                    <option value="">UNCATEGORIZED</option>
                                                     {departments.map(d => (
-                                                        <option key={d._id} value={d._id}>{d.name}</option>
+                                                        <option key={d._id} value={d._id}>{d.name.toUpperCase()}</option>
                                                     ))}
                                                 </select>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="px-8 py-6 text-center">
                                                 <button
                                                     onClick={() => handleUpdateUser(u._id, { isApproved: !u.isApproved })}
-                                                    className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${u.isApproved ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}
+                                                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${u.isApproved ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 border border-amber-500/20 shadow-lg shadow-amber-500/10'}`}
                                                 >
-                                                    {u.isApproved ? 'Approved' : 'Pending'}
+                                                    {u.isApproved ? 'Verified' : 'Review Required'}
                                                 </button>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
+                                            <td className="px-8 py-6 text-right">
+                                                <div className="flex items-center justify-end gap-3">
                                                     {isAdmin && u._id !== user._id && (
                                                         <button
                                                             onClick={() => handleDeleteUser(u)}
-                                                            className="p-2 text-slate-400 hover:text-red-500 transition-all"
+                                                            className="p-3 bg-red-500/5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                                            title="Terminate User Account"
                                                         >
                                                             <Trash2 className="w-5 h-5" />
                                                         </button>

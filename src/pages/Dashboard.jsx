@@ -1,16 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
-import AdminDashboard from './AdminDashboard';
-import SelfAttendanceDashboard from './SelfAttendanceDashboard'; // Legacy support
 
 const Dashboard = () => {
     const { user } = useAuth();
 
-    // Debugging
-
-
-    if (!user) return null;
+    if (!user) return <Navigate to="/auth" replace />;
 
     switch (user.role) {
         case 'admin':
@@ -25,8 +20,7 @@ const Dashboard = () => {
         case 'hod':
             return <Navigate to="/hod" replace />;
         default:
-            // Fallback for generic users or legacy setup
-            return <SelfAttendanceDashboard />;
+            return <Navigate to="/auth" replace />;
     }
 };
 
