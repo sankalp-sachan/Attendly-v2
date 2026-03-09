@@ -646,18 +646,18 @@ const TeacherClassDetails = () => {
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             className={`flex flex-col sm:flex-row items-center justify-between p-5 rounded-2xl transition-all border ${attendanceRecords[student._id] === 'Present'
-                                                    ? 'bg-emerald-500/[0.03] border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)]'
-                                                    : attendanceRecords[student._id] === 'Absent'
-                                                        ? 'bg-rose-500/[0.03] border-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.05)]'
-                                                        : 'bg-amber-500/[0.03] border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.05)]'
+                                                ? 'bg-emerald-500/[0.03] border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)]'
+                                                : attendanceRecords[student._id] === 'Absent'
+                                                    ? 'bg-rose-500/[0.03] border-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.05)]'
+                                                    : 'bg-amber-500/[0.03] border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.05)]'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-5 mb-4 sm:mb-0 w-full sm:w-auto">
                                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-base border transition-colors ${attendanceRecords[student._id] === 'Present'
-                                                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                                        : attendanceRecords[student._id] === 'Absent'
-                                                            ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                                                            : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                    : attendanceRecords[student._id] === 'Absent'
+                                                        ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                                                        : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                                     }`}>
                                                     {student?.name?.charAt(0) || '?'}
                                                 </div>
@@ -670,16 +670,16 @@ const TeacherClassDetails = () => {
                                                 <button
                                                     onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Present' }))}
                                                     className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${attendanceRecords[student._id] === 'Present'
-                                                            ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] scale-105'
-                                                            : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
+                                                        ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] scale-105'
+                                                        : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
                                                 >
                                                     Present
                                                 </button>
                                                 <button
                                                     onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Absent' }))}
                                                     className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${attendanceRecords[student._id] === 'Absent'
-                                                            ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)] scale-105'
-                                                            : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
+                                                        ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)] scale-105'
+                                                        : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
                                                 >
                                                     Absent
                                                 </button>
@@ -744,8 +744,8 @@ const TeacherClassDetails = () => {
                                         <div key={student.studentId} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-colors group">
                                             <p className="font-black text-white text-sm tracking-tight">{student.name}</p>
                                             <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black w-14 text-center border ${statsModalData.type === 'critical'
-                                                    ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                                                    : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                                                : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                                                 }`}>
                                                 {student.percentage}%
                                             </div>
