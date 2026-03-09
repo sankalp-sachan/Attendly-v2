@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, BookOpen, TrendingUp, AlertCircle, LogOut, Bell, Key, MessageCircle, XCircle } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, AlertCircle, LogOut, Bell, Key, MessageCircle, XCircle, GraduationCap, School } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 

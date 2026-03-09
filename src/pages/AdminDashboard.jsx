@@ -45,7 +45,7 @@ const AdminDashboard = () => {
 
     const handleUpdateUser = async (userId, updates) => {
         try {
-            await api.put(`/ admin / users / ${userId}/role`, updates);
+            await api.put(`/admin/users/${userId}/role`, updates);
             fetchData();
         } catch (error) {
             alert("Failed to update user");
