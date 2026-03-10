@@ -655,7 +655,7 @@ const TeacherClassDetails = () => {
                                 {classData.students?.length === 0 ? (
                                     <div className="p-20 text-center opacity-40 italic text-slate-500">No identities synchronized for this registry.</div>
                                 ) : (
-                                    classData.students?.map((student, index) => (
+                                    classData.students?.slice().sort((a, b) => (a.rollNo || '').localeCompare(b.rollNo || '', undefined, { numeric: true })).map((student, index) => (
                                         <div
                                             key={index}
                                             className={`flex flex-row items-center justify-between p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] transition-all border duration-500 group ${attendanceRecords[student._id] === 'Present'
@@ -680,7 +680,7 @@ const TeacherClassDetails = () => {
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <p className="font-black text-white text-[13px] md:text-base tracking-tight truncate leading-none">
-                                                        {student.rollNo && student.rollNo !== 'N/A' ? student.rollNo : student.name}
+                                                        {student.rollNo && student.rollNo !== 'N/A' ? (student.rollNo.length > 3 ? student.rollNo.slice(-3) : student.rollNo) : student.name}
                                                     </p>
                                                     {student.rollNo && student.rollNo !== 'N/A' && (
                                                         <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mt-1 truncate">

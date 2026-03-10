@@ -559,7 +559,7 @@ const TeacherDashboard = () => {
                                         <p className="text-xs font-black uppercase tracking-widest text-slate-400">Class is currently empty</p>
                                     </div>
                                 ) : (
-                                    selectedClassForAttendance.students?.map(student => (
+                                    selectedClassForAttendance.students?.slice().sort((a, b) => (a.rollNo || '').localeCompare(b.rollNo || '', undefined, { numeric: true })).map(student => (
                                         <div
                                             key={student._id}
                                             className={`flex flex-row items-center justify-between p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] transition-all border duration-500 group ${attendanceRecords[student._id] === 'Present'
@@ -581,7 +581,7 @@ const TeacherDashboard = () => {
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <p className="font-black dark:text-white tracking-tight text-[13px] md:text-lg truncate leading-none">
-                                                        {student.rollNo && student.rollNo !== 'N/A' ? student.rollNo : student.name}
+                                                        {student.rollNo && student.rollNo !== 'N/A' ? (student.rollNo.length > 3 ? student.rollNo.slice(-3) : student.rollNo) : student.name}
                                                     </p>
                                                     {student.rollNo && student.rollNo !== 'N/A' && (
                                                         <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1 truncate">
