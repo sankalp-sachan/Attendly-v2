@@ -35,7 +35,15 @@ const StudentDashboard = () => {
 
     useEffect(() => {
         fetchStudentClasses();
+        checkProfileCompletion();
     }, []);
+
+    const checkProfileCompletion = () => {
+        const isIncomplete = !user?.name || !user?.rollNo || !user?.enrollmentNo || !user?.mobileNo || !user?.section || !user?.year;
+        if (isIncomplete) {
+            setShowProfileModal(true);
+        }
+    };
 
     const fetchStudentClasses = async () => {
         try {
@@ -140,10 +148,16 @@ const StudentDashboard = () => {
                     <div className="flex gap-3 w-full sm:w-auto">
                         <button
                             onClick={() => setShowProfileModal(true)}
-                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 border border-white/5"
+                            className={`p-3 md:p-4 rounded-xl md:rounded-2xl transition-all duration-300 border relative ${(!user?.rollNo || !user?.enrollmentNo || !user?.mobileNo)
+                                    ? 'bg-rose-500/10 text-rose-500 border-rose-500/50 animate-pulse'
+                                    : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border-white/5'
+                                }`}
                             title="My Profile"
                         >
                             <User className="w-4 h-4 md:w-5 md:h-5" />
+                            {(!user?.rollNo || !user?.enrollmentNo || !user?.mobileNo) && (
+                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-[#020617] shadow-[0_0_10px_rgba(244,63,94,0.5)]" />
+                            )}
                         </button>
                         <button
                             onClick={() => setShowJoinModal(true)}
@@ -411,6 +425,11 @@ const StudentDashboard = () => {
                                 <div>
                                     <h2 className="text-3xl font-black text-white tracking-tighter">My Profile</h2>
                                     <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Manage academic details</p>
+                                    {(!user?.rollNo || !user?.enrollmentNo || !user?.mobileNo) && (
+                                        <p className="mt-4 px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                            ⚠️ Essential details missing
+                                        </p>
+                                    )}
                                 </div>
                                 <button onClick={() => setShowProfileModal(false)} className="p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-rose-500/20 hover:text-rose-500 transition-all text-slate-500">
                                     <XCircle className="w-6 h-6" />
