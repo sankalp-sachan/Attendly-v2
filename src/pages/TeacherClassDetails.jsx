@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ArrowLeft, Users, Calendar, ClipboardList, Settings,
-    Share2, Plus, CheckCircle, XCircle, Clock, Save, BarChart2,
-    Download, ShieldCheck, UserPlus, Star, AlertCircle, Search, Loader2
+    X, Check, Search, Calendar, Filter, Users, ClipboardList, Info,
+    ChevronDown, UserCheck, Shield, BookOpen, AlertCircle, Save,
+    ArrowLeft, MoreVertical, Download, FileText, Share2, MoreHorizontal,
+    Printer, Loader2, Trophy, Clock, Trash2, Edit2, History, TrendingUp, XCircle, CheckCircle,
+    BarChart2, Star, ShieldCheck, Plus
 } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -41,6 +43,8 @@ const TeacherClassDetails = () => {
     // Quick Stats Modal state
     const [showStatsModal, setShowStatsModal] = useState(false);
     const [statsModalData, setStatsModalData] = useState({ title: '', type: '', students: [] });
+    const [showLogModal, setShowLogModal] = useState(false);
+    const [selectedLog, setSelectedLog] = useState(null);
 
     useEffect(() => {
         fetchClassDetails();
@@ -75,6 +79,7 @@ const TeacherClassDetails = () => {
 
     const exportToExcel = () => {
         const data = analytics.studentStats.map(s => ({
+            RollNo: s.rollNo || 'N/A',
             Name: s.name,
             Present: s.present,
             Total: s.total,
@@ -83,17 +88,17 @@ const TeacherClassDetails = () => {
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
-        XLSX.writeFile(workbook, `${classData.name}_Attendance.xlsx`);
+        XLSX.writeFile(workbook, `${classData.name} _Attendance.xlsx`);
     };
 
     const exportToPDF = () => {
         const doc = new jsPDF();
-        doc.text(`Attendance Report: ${classData.name}`, 14, 15);
-        doc.text(`Subject: ${classData.subject || 'N/A'}`, 14, 22);
+        doc.text(`Attendance Report: ${classData.name} `, 14, 15);
+        doc.text(`Subject: ${classData.subject || 'N/A'} `, 14, 22);
 
-        const tableData = analytics.studentStats.map(s => [s.name, s.present, s.total, s.percentage + '%']);
+        const tableData = analytics.studentStats.map(s => [s.rollNo || 'N/A', s.name, s.present, s.total, s.percentage + '%']);
         doc.autoTable({
-            head: [['Student Name', 'Present', 'Total Classes', 'Percentage']],
+            head: [['Roll No', 'Student Name', 'Present', 'Total Classes', 'Percentage']],
             body: tableData,
             startY: 30,
         });
@@ -103,7 +108,7 @@ const TeacherClassDetails = () => {
     const openAttendanceModal = () => {
         const initialRecords = {};
         classData.students?.forEach(s => {
-            initialRecords[s._id] = 'Present';
+            initialRecords[s._id] = ''; // Default to unmarked
         });
         setAttendanceRecords(initialRecords);
         setAttendanceDate(new Date().toISOString().split('T')[0]);
@@ -205,7 +210,7 @@ const TeacherClassDetails = () => {
                                 className="btn-primary flex-1 sm:flex-none px-8 py-4 rounded-2xl text-[10px] md:text-xs uppercase font-black tracking-widest shadow-2xl shadow-primary-500/20"
                             >
                                 <ClipboardList className="w-5 h-5" />
-                                <span>Log Entry</span>
+                                <span>Mark Attendance</span>
                             </button>
                         </div>
                     )}
@@ -259,7 +264,7 @@ const TeacherClassDetails = () => {
                                 <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2">Performance Spectrum</h3>
                                 <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">
                                     {analytics.studentStats.length > 0
-                                        ? `${Math.min(...analytics.studentStats.map(s => s.percentage))}% - ${Math.max(...analytics.studentStats.map(s => s.percentage))}%`
+                                        ? `${Math.min(...analytics.studentStats.map(s => s.percentage))}% - ${Math.max(...analytics.studentStats.map(s => s.percentage))}% `
                                         : '0%'}
                                 </p>
                                 <p className="mt-2 text-[10px] font-bold text-indigo-400 uppercase tracking-widest opacity-80">Engagement Range</p>
@@ -357,7 +362,7 @@ const TeacherClassDetails = () => {
                                                                 </div>
                                                                 <div>
                                                                     <div className="font-black text-white text-base tracking-tight flex items-center gap-3">
-                                                                        {student.name}
+                                                                        {student.rollNo && student.rollNo !== 'N/A' ? student.rollNo : student.name}
                                                                         <div className="flex gap-1.5">
                                                                             {classData.CRs?.some(id => (id._id || id) === student.studentId) && (
                                                                                 <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-lg text-[8px] uppercase font-black tracking-widest">CR (REP)</span>
@@ -367,7 +372,11 @@ const TeacherClassDetails = () => {
                                                                             )}
                                                                         </div>
                                                                     </div>
-                                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Verified Academic Account</p>
+                                                                    {student.rollNo && student.rollNo !== 'N/A' && (
+                                                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5 truncate max-w-xs lowercase first-letter:uppercase">
+                                                                            {student.name}
+                                                                        </p>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -392,7 +401,8 @@ const TeacherClassDetails = () => {
                                                                         title={classData.CRs?.some(id => (id._id || id) === student.studentId) ? "Revoke CR" : "Promote to CR"}
                                                                         className={`p-2.5 rounded-xl transition-all border ${classData.CRs?.some(id => (id._id || id) === student.studentId)
                                                                             ? 'bg-amber-500/20 text-amber-500 border-amber-500/30'
-                                                                            : 'bg-white/5 text-slate-500 border-white/10 hover:text-amber-400 hover:bg-amber-400/10 hover:border-amber-400/20'}`}
+                                                                            : 'bg-white/5 text-slate-500 border-white/10 hover:text-amber-400 hover:bg-amber-400/10 hover:border-amber-400/20'
+                                                                            }`}
                                                                     >
                                                                         <Star className={`w-4 h-4 ${classData.CRs?.some(id => (id._id || id) === student.studentId) ? 'fill-amber-500' : ''}`} />
                                                                     </button>
@@ -402,7 +412,8 @@ const TeacherClassDetails = () => {
                                                                         title={classData.mentors?.some(id => (id._id || id) === student.studentId) ? "Revoke Mentor" : "Promote to Mentor"}
                                                                         className={`p-2.5 rounded-xl transition-all border ${classData.mentors?.some(id => (id._id || id) === student.studentId)
                                                                             ? 'bg-primary-500/20 text-primary-400 border-primary-500/30'
-                                                                            : 'bg-white/5 text-slate-500 border-white/10 hover:text-primary-400 hover:bg-primary-400/10 hover:border-primary-400/20'}`}
+                                                                            : 'bg-white/5 text-slate-500 border-white/10 hover:text-primary-400 hover:bg-primary-400/10 hover:border-primary-400/20'
+                                                                            }`}
                                                                     >
                                                                         <ShieldCheck className="w-4 h-4" />
                                                                     </button>
@@ -494,7 +505,7 @@ const TeacherClassDetails = () => {
                                     <h3 className="text-sm font-black text-slate-500 uppercase tracking-[0.25em] mb-4">Class Intelligence</h3>
                                     <div className="flex items-center gap-4 py-2 border-b border-white/5">
                                         <div className="w-2 h-2 rounded-full bg-primary-500 shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
-                                        <span className="text-xs text-slate-400 font-bold">Average Engagement: <span className="text-white">{(analytics.studentStats.reduce((a, b) => a + b.percentage, 0) / (analytics.studentStats.length || 1)).toFixed(1)}%</span></span>
+                                        <span className="text-xs text-slate-400 font-bold">Average Engagement: <span className="text-white">{(analytics.studentStats.reduce((a, b) => a + parseFloat(b.percentage || 0), 0) / (analytics.studentStats.length || 1)).toFixed(1)}%</span></span>
                                     </div>
                                     <div className="flex items-center gap-4 py-3">
                                         <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_5px_rgba(99,102,241,0.5)]" />
@@ -569,7 +580,10 @@ const TeacherClassDetails = () => {
                                                     </div>
                                                 </div>
                                                 <button
-                                                    onClick={() => navigate(`/teacher/classes/${classData._id}/attendance/${record._id}`)}
+                                                    onClick={() => {
+                                                        setSelectedLog(record);
+                                                        setShowLogModal(true);
+                                                    }}
                                                     className="px-6 py-2.5 rounded-xl border border-white/10 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-white/5 hover:text-white transition-all w-full sm:w-auto text-center"
                                                 >
                                                     Review Log
@@ -603,7 +617,7 @@ const TeacherClassDetails = () => {
                         >
                             <div className="p-8 md:p-10 border-b border-white/5 flex justify-between items-start shrink-0">
                                 <div>
-                                    <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1 uppercase">Log Engagement</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-1 uppercase">Mark Attendance</h2>
                                     <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em]">{classData.name} • Session Registry</p>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -631,7 +645,8 @@ const TeacherClassDetails = () => {
                                         value={attendanceDate}
                                         max={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setAttendanceDate(e.target.value)}
-                                        className="bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-white font-black text-sm outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all w-full sm:w-64"
+                                        onClick={(e) => e.target.showPicker?.()}
+                                        className="bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-white font-black text-sm outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all w-full sm:w-64 cursor-pointer"
                                     />
                                 </div>
                             </div>
@@ -640,51 +655,61 @@ const TeacherClassDetails = () => {
                                 {classData.students?.length === 0 ? (
                                     <div className="p-20 text-center opacity-40 italic text-slate-500">No identities synchronized for this registry.</div>
                                 ) : (
-                                    classData.students?.map(student => (
-                                        <motion.div
-                                            key={student._id}
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className={`flex flex-col sm:flex-row items-center justify-between p-5 rounded-2xl transition-all border ${attendanceRecords[student._id] === 'Present'
+                                    classData.students?.map((student, index) => (
+                                        <div
+                                            key={index}
+                                            className={`flex flex-row items-center justify-between p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] transition-all border duration-500 group ${attendanceRecords[student._id] === 'Present'
                                                 ? 'bg-emerald-500/[0.03] border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)]'
                                                 : attendanceRecords[student._id] === 'Absent'
                                                     ? 'bg-rose-500/[0.03] border-rose-500/20 shadow-[0_0_20px_rgba(244,63,94,0.05)]'
-                                                    : 'bg-amber-500/[0.03] border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.05)]'
+                                                    : attendanceRecords[student._id] === 'Holiday'
+                                                        ? 'bg-amber-500/[0.03] border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.05)]'
+                                                        : 'bg-white/[0.01] border-white/5'
                                                 }`}
                                         >
-                                            <div className="flex items-center gap-5 mb-4 sm:mb-0 w-full sm:w-auto">
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-base border transition-colors ${attendanceRecords[student._id] === 'Present'
+                                            <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 mr-2">
+                                                <div className={`w-8 h-8 md:w-11 md:h-11 shrink-0 rounded-lg md:rounded-xl flex items-center justify-center font-black text-[10px] md:text-base border transition-colors ${attendanceRecords[student._id] === 'Present'
                                                     ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                                                     : attendanceRecords[student._id] === 'Absent'
                                                         ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                                                        : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                        : attendanceRecords[student._id] === 'Holiday'
+                                                            ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                            : 'bg-white/5 text-slate-500 border-white/5'
                                                     }`}>
                                                     {student?.name?.charAt(0) || '?'}
                                                 </div>
-                                                <div>
-                                                    <p className="font-black text-white text-base tracking-tight">{student.name}</p>
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{student.email}</p>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-black text-white text-[13px] md:text-base tracking-tight truncate leading-none">
+                                                        {student.rollNo && student.rollNo !== 'N/A' ? student.rollNo : student.name}
+                                                    </p>
+                                                    {student.rollNo && student.rollNo !== 'N/A' && (
+                                                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mt-1 truncate">
+                                                            {student.name}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2 w-full sm:w-auto">
+                                            <div className="flex gap-1.5 md:gap-2 shrink-0">
                                                 <button
                                                     onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Present' }))}
-                                                    className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${attendanceRecords[student._id] === 'Present'
-                                                        ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] scale-105'
+                                                    className={`w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl transition-all border flex items-center justify-center ${attendanceRecords[student._id] === 'Present'
+                                                        ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
                                                         : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
+                                                    title="Mark Present"
                                                 >
-                                                    Present
+                                                    <Check className="w-4 h-4 md:w-6 md:h-6" />
                                                 </button>
                                                 <button
                                                     onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Absent' }))}
-                                                    className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all border ${attendanceRecords[student._id] === 'Absent'
-                                                        ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)] scale-105'
+                                                    className={`w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl transition-all border flex items-center justify-center ${attendanceRecords[student._id] === 'Absent'
+                                                        ? 'bg-rose-500 text-white border-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)]'
                                                         : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'}`}
+                                                    title="Mark Absent"
                                                 >
-                                                    Absent
+                                                    <X className="w-4 h-4 md:w-6 md:h-6" />
                                                 </button>
                                             </div>
-                                        </motion.div>
+                                        </div>
                                     ))
                                 )}
                             </div>
@@ -692,12 +717,92 @@ const TeacherClassDetails = () => {
                             <div className="p-8 md:p-10 border-t border-white/5 shrink-0 bg-black/20">
                                 <button
                                     onClick={handleSaveAttendance}
-                                    disabled={classData.students?.length === 0 || isSaving}
+                                    disabled={
+                                        classData.students?.length === 0 ||
+                                        isSaving ||
+                                        Object.values(attendanceRecords).some(status => status === '')
+                                    }
                                     className="w-full btn-primary h-16 rounded-[1.5rem] flex items-center justify-center gap-4 disabled:opacity-30 disabled:cursor-not-allowed group"
                                 >
                                     {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6 group-hover:scale-110 transition-transform" />}
                                     <span className="text-[11px] font-black uppercase tracking-[0.3em]">Commit Entry to Block</span>
                                 </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Log Detail Modal */}
+            <AnimatePresence>
+                {showLogModal && selectedLog && (
+                    <div className="fixed inset-0 flex items-center justify-center z-[110] p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowLogModal(false)}
+                            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-2xl rounded-[2.5rem] border border-white/10 shadow-2xl relative z-10 flex flex-col max-h-[85vh]"
+                        >
+                            <div className="p-8 border-b border-white/5 flex justify-between items-center shrink-0">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Attendance Log</h2>
+                                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest mt-1">
+                                        {new Date(selectedLog.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowLogModal(false)}
+                                    className="p-3 rounded-xl hover:bg-white/5 text-slate-400"
+                                >
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-3 scrollbar-none">
+                                <div className="grid grid-cols-2 gap-3 mb-6">
+                                    <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                                        <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1">Present</p>
+                                        <p className="text-2xl font-black text-white tracking-tighter">{selectedLog.records.filter(r => r.status === 'Present').length}</p>
+                                    </div>
+                                    <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl">
+                                        <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest mb-1">Absent</p>
+                                        <p className="text-2xl font-black text-white tracking-tighter">{selectedLog.records.filter(r => r.status === 'Absent').length}</p>
+                                    </div>
+                                </div>
+
+                                {selectedLog.records.map((record, index) => (
+                                    <div key={index} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs ${record.status === 'Present' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                record.status === 'Absent' ? 'bg-rose-500/20 text-rose-400' :
+                                                    'bg-amber-500/20 text-amber-400'
+                                                }`}>
+                                                {record.student?.name?.charAt(0) || '?'}
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-white text-sm tracking-tight">
+                                                    {record.student?.rollNo || record.student?.name}
+                                                </p>
+                                                {record.student?.rollNo && (
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{record.student?.name}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${record.status === 'Present' ? 'bg-emerald-500/10 text-emerald-500' :
+                                            record.status === 'Absent' ? 'bg-rose-500/10 text-rose-500' :
+                                                'bg-amber-500/10 text-amber-500'
+                                            }`}>
+                                            {record.status}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </motion.div>
                     </div>
@@ -742,22 +847,28 @@ const TeacherClassDetails = () => {
                                 ) : (
                                     statsModalData.students.map(student => (
                                         <div key={student.studentId} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-colors group">
-                                            <p className="font-black text-white text-sm tracking-tight">{student.name}</p>
+                                            <div>
+                                                <p className="font-black text-white text-sm tracking-tight">
+                                                    {(student.rollNo || student.enrollmentNo)
+                                                        ? `${student.rollNo || 'N/A'} / ${student.enrollmentNo || 'N/A'}`
+                                                        : student.name}
+                                                </p>
+                                            </div>
                                             <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black w-14 text-center border ${statsModalData.type === 'critical'
                                                 ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                                                 : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                                                 }`}>
                                                 {student.percentage}%
                                             </div>
-                                        </div>
+                                        </div >
                                     ))
                                 )}
-                            </div>
-                        </motion.div>
-                    </div>
+                            </div >
+                        </motion.div >
+                    </div >
                 )}
-            </AnimatePresence>
-        </div>
+            </AnimatePresence >
+        </div >
     );
 };
 

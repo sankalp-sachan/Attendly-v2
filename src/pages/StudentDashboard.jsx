@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, BookOpen, TrendingUp, AlertCircle, LogOut, Bell, Key, MessageCircle, XCircle, GraduationCap, School, ArrowRight } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, AlertCircle, LogOut, Bell, Key, MessageCircle, XCircle, GraduationCap, School, ArrowRight, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
 import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateUserProfile } = useAuth();
     const navigate = useNavigate();
     const [enrolledClasses, setEnrolledClasses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,6 +20,18 @@ const StudentDashboard = () => {
     const [selectedClassForCorrection, setSelectedClassForCorrection] = useState(null);
     const [correctionDate, setCorrectionDate] = useState(new Date().toISOString().split('T')[0]);
     const [correctionReason, setCorrectionReason] = useState('');
+
+    // Profile State
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [profileData, setProfileData] = useState({
+        name: user?.name || '',
+        rollNo: user?.rollNo || '',
+        enrollmentNo: user?.enrollmentNo || '',
+        mobileNo: user?.mobileNo || '',
+        section: user?.section || '',
+        year: user?.year || ''
+    });
+    const [profileMessage, setProfileMessage] = useState('');
 
     useEffect(() => {
         fetchStudentClasses();
@@ -74,6 +86,20 @@ const StudentDashboard = () => {
         setShowCorrectionModal(true);
     };
 
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            await updateUserProfile(profileData);
+            setProfileMessage('Profile updated successfully!');
+            setTimeout(() => {
+                setShowProfileModal(false);
+                setProfileMessage('');
+            }, 1500);
+        } catch (error) {
+            setProfileMessage('Failed to update profile.');
+        }
+    };
+
     return (
         <div className="min-h-screen relative bg-[#020617] p-4 md:p-8 lg:p-10 overflow-x-hidden font-sans">
             {/* Cinematic Background Atmosphere */}
@@ -112,6 +138,13 @@ const StudentDashboard = () => {
                         </div>
                     </div>
                     <div className="flex gap-3 w-full sm:w-auto">
+                        <button
+                            onClick={() => setShowProfileModal(true)}
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 border border-white/5"
+                            title="My Profile"
+                        >
+                            <User className="w-4 h-4 md:w-5 md:h-5" />
+                        </button>
                         <button
                             onClick={() => setShowJoinModal(true)}
                             className="flex-1 sm:flex-none btn-primary px-6 py-3 text-sm rounded-xl md:rounded-2xl"
@@ -339,9 +372,10 @@ const StudentDashboard = () => {
                                     <input
                                         type="date"
                                         required
-                                        className="input-field"
+                                        className="input-field cursor-pointer"
                                         value={correctionDate}
                                         onChange={(e) => setCorrectionDate(e.target.value)}
+                                        onClick={(e) => e.target.showPicker?.()}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -356,6 +390,113 @@ const StudentDashboard = () => {
                                 </div>
                                 <button type="submit" className="w-full btn-primary py-5 rounded-2xl text-lg shadow-2xl shadow-primary-500/20 uppercase tracking-widest font-black">
                                     File Request
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Profile Modal */}
+            <AnimatePresence>
+                {showProfileModal && (
+                    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-md rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar"
+                        >
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <h2 className="text-3xl font-black text-white tracking-tighter">My Profile</h2>
+                                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Manage academic details</p>
+                                </div>
+                                <button onClick={() => setShowProfileModal(false)} className="p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-rose-500/20 hover:text-rose-500 transition-all text-slate-500">
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleProfileUpdate} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="Your Custom Name"
+                                        value={profileData.name}
+                                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Roll Number</label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="e.g. 21B2"
+                                        value={profileData.rollNo}
+                                        onChange={(e) => setProfileData({ ...profileData, rollNo: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Enrollment Number</label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="e.g. 0111XX7085"
+                                        value={profileData.enrollmentNo}
+                                        onChange={(e) => setProfileData({ ...profileData, enrollmentNo: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mobile Number</label>
+                                    <input
+                                        type="tel"
+                                        className="input-field"
+                                        placeholder="Mobile No"
+                                        value={profileData.mobileNo}
+                                        onChange={(e) => setProfileData({ ...profileData, mobileNo: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Section</label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="e.g. CS-4"
+                                        value={profileData.section}
+                                        onChange={(e) => setProfileData({ ...profileData, section: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Year</label>
+                                    <select
+                                        className="input-field bg-[#0f172a]"
+                                        value={profileData.year}
+                                        onChange={(e) => setProfileData({ ...profileData, year: e.target.value })}
+                                        required
+                                    >
+                                        <option value="" disabled>Select Year</option>
+                                        <option value="1">1st Year</option>
+                                        <option value="2">2nd Year</option>
+                                        <option value="3">3rd Year</option>
+                                        <option value="4">4th Year</option>
+                                    </select>
+                                </div>
+
+                                {profileMessage && (
+                                    <div className={`p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 ${profileMessage.includes('successfully') ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+                                        {profileMessage}
+                                    </div>
+                                )}
+
+                                <button type="submit" className="w-full btn-primary py-5 rounded-2xl text-lg shadow-2xl shadow-primary-500/20 uppercase tracking-widest font-black mt-2">
+                                    Save Profile
                                 </button>
                             </form>
                         </motion.div>

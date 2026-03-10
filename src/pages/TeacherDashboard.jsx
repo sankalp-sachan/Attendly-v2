@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Users, Calendar, CheckCircle, XCircle, ArrowRight,
     Share2, ClipboardList, LogOut, Shield, UserCheck, Bell, Clock, Save,
-    MessageCircle, AlertCircle, Loader2
+    MessageCircle, AlertCircle, Loader2, Check, X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -100,7 +100,7 @@ const TeacherDashboard = () => {
         setSelectedClassForAttendance(cls);
         const initialRecords = {};
         cls.students?.forEach(s => {
-            initialRecords[s._id] = 'Present';
+            initialRecords[s._id] = ''; // Default to unmarked
         });
         setAttendanceRecords(initialRecords);
         setAttendanceDate(new Date().toISOString().split('T')[0]);
@@ -312,7 +312,7 @@ const TeacherDashboard = () => {
                                         className="flex-1 btn-primary py-3.5 md:py-4 rounded-2xl text-[10px] md:text-xs flex items-center justify-center gap-2 uppercase font-black tracking-widest"
                                     >
                                         <ClipboardList className="w-4 h-4" />
-                                        Log Attendance
+                                        Mark Attendance
                                     </button>
                                     <button
                                         onClick={() => navigate(`/teacher/classes/${cls._id}`)}
@@ -443,8 +443,14 @@ const TeacherDashboard = () => {
                                                         {cls.pendingStudents.map(student => (
                                                             <div key={student._id} className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-950/50 rounded-3xl border border-slate-100 dark:border-white/5">
                                                                 <div>
-                                                                    <p className="font-black dark:text-white tracking-tight">{student.name}</p>
-                                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{student.email.split('@')[0]}</p>
+                                                                    <p className="font-black dark:text-white tracking-tight">
+                                                                        {student.rollNo && student.rollNo !== 'N/A' ? student.rollNo : student.name}
+                                                                    </p>
+                                                                    {student.rollNo && student.rollNo !== 'N/A' && (
+                                                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
+                                                                            {student.name}
+                                                                        </p>
+                                                                    )}
                                                                 </div>
                                                                 <div className="flex gap-2">
                                                                     <button onClick={() => handleJoinAction(cls._id, student._id, 'approve')} className="p-3 bg-emerald-500/10 text-emerald-600 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all"><CheckCircle className="w-5 h-5" /></button>
@@ -472,7 +478,14 @@ const TeacherDashboard = () => {
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div>
                                                         <span className="text-[9px] font-black uppercase tracking-widest text-primary-600 bg-primary-500/10 px-2 py-1 rounded-md">{req.class?.name}</span>
-                                                        <p className="font-black dark:text-white mt-2 text-lg tracking-tight">{req.student?.name}</p>
+                                                        <p className="font-black dark:text-white mt-2 text-lg tracking-tight">
+                                                            {req.student?.rollNo && req.student?.rollNo !== 'N/A' ? req.student.rollNo : req.student?.name}
+                                                        </p>
+                                                        {req.student?.rollNo && req.student?.rollNo !== 'N/A' && (
+                                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                                                                {req.student.name}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                     <span className="text-[10px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">{new Date(req.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                                                 </div>
@@ -533,6 +546,7 @@ const TeacherDashboard = () => {
                                         value={attendanceDate}
                                         max={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setAttendanceDate(e.target.value)}
+                                        onClick={(e) => e.target.showPicker?.()}
                                         className="bg-transparent font-black text-slate-900 dark:text-white outline-none cursor-pointer"
                                     />
                                 </div>
@@ -548,37 +562,48 @@ const TeacherDashboard = () => {
                                     selectedClassForAttendance.students?.map(student => (
                                         <div
                                             key={student._id}
-                                            className={`flex items-center justify-between p-5 rounded-[2rem] transition-all border duration-500 group ${attendanceRecords[student._id] === 'Present'
+                                            className={`flex flex-row items-center justify-between p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] transition-all border duration-500 group ${attendanceRecords[student._id] === 'Present'
                                                 ? 'bg-emerald-500/5 border-emerald-500/20'
                                                 : attendanceRecords[student._id] === 'Absent'
                                                     ? 'bg-red-500/5 border-red-500/20'
-                                                    : 'bg-amber-500/5 border-amber-500/20'
+                                                    : attendanceRecords[student._id] === 'Holiday'
+                                                        ? 'bg-amber-500/5 border-amber-500/20'
+                                                        : 'bg-slate-800/20 border-white/5'
                                                 }`}
                                         >
-                                            <div className="flex items-center gap-5">
-                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all duration-500 group-hover:scale-110 ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                            <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 mr-2">
+                                                <div className={`w-8 h-8 md:w-12 md:h-12 shrink-0 rounded-xl flex items-center justify-center font-black text-xs md:text-xl transition-all duration-500 group-hover:scale-110 ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
                                                     : attendanceRecords[student._id] === 'Absent' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20'
-                                                        : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                                                        : attendanceRecords[student._id] === 'Holiday' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                                                            : 'bg-slate-700 text-slate-400'
                                                     }`}>
                                                     {student?.name?.charAt(0) || '?'}
                                                 </div>
-                                                <div>
-                                                    <p className="font-black dark:text-white tracking-tight text-lg">{student.name}</p>
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{student.rollNumber || student.email.split('@')[0]}</p>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-black dark:text-white tracking-tight text-[13px] md:text-lg truncate leading-none">
+                                                        {student.rollNo && student.rollNo !== 'N/A' ? student.rollNo : student.name}
+                                                    </p>
+                                                    {student.rollNo && student.rollNo !== 'N/A' && (
+                                                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1 truncate">
+                                                            {student.name}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div className="flex gap-3">
+                                            <div className="flex gap-1.5 md:gap-2 shrink-0">
                                                 <button
                                                     onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Present' }))}
-                                                    className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-600'}`}
+                                                    className={`w-9 h-9 md:w-11 md:h-11 rounded-xl transition-all border flex items-center justify-center ${attendanceRecords[student._id] === 'Present' ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 border-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-transparent hover:bg-emerald-500/10 hover:text-emerald-600'}`}
+                                                    title="Mark Present"
                                                 >
-                                                    Present
+                                                    <Check className="w-4 h-4 md:w-5 md:h-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => setAttendanceRecords(prev => ({ ...prev, [student._id]: 'Absent' }))}
-                                                    className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${attendanceRecords[student._id] === 'Absent' ? 'bg-red-500 text-white shadow-xl shadow-red-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-red-500/10 hover:text-red-600'}`}
+                                                    className={`w-9 h-9 md:w-11 md:h-11 rounded-xl transition-all border flex items-center justify-center ${attendanceRecords[student._id] === 'Absent' ? 'bg-red-500 text-white shadow-xl shadow-red-500/30 border-red-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-transparent hover:bg-red-500/10 hover:text-red-600'}`}
+                                                    title="Mark Absent"
                                                 >
-                                                    Absent
+                                                    <X className="w-4 h-4 md:w-5 md:h-5" />
                                                 </button>
                                             </div>
                                         </div>
@@ -589,8 +614,12 @@ const TeacherDashboard = () => {
                             <div className="pt-8 border-t dark:border-white/5">
                                 <button
                                     onClick={handleSaveAttendance}
-                                    disabled={selectedClassForAttendance.students?.length === 0 || isSaving}
-                                    className="w-full btn-primary py-6 rounded-[2rem] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group shadow-2xl shadow-primary-500/20 relative overflow-hidden"
+                                    disabled={
+                                        selectedClassForAttendance.students?.length === 0 ||
+                                        isSaving ||
+                                        Object.values(attendanceRecords).some(status => status === '')
+                                    }
+                                    className="w-full btn-primary py-6 rounded-[2rem] flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed group shadow-2xl shadow-primary-500/20 relative overflow-hidden"
                                 >
                                     {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6 group-hover:scale-110 transition-transform" />}
                                     <span className="text-lg font-black tracking-tight">{isSaving ? "Finalizing..." : "Submit Attendance"}</span>
