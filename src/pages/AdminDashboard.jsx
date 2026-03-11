@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Shield, Users, Trash2, LogOut, Search, Building, Plus, User as UserIcon, List, XCircle
+    Shield, Users, Trash2, LogOut, Search, Building, Plus, User as UserIcon, List, XCircle, Download
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ const AdminDashboard = () => {
     const { user, logout, deleteUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [departments, setDepartments] = useState([]);
+    const [classesList, setClassesList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [tab, setTab] = useState('users'); // 'users', 'departments', 'audit'
@@ -36,6 +37,8 @@ const AdminDashboard = () => {
             setUsers(usersRes.data);
             const deptRes = await api.get('/admin/departments');
             setDepartments(deptRes.data);
+            const classRes = await api.get('/admin/classes');
+            setClassesList(classRes.data);
         } catch (error) {
             console.error("Failed to fetch admin data");
         } finally {
@@ -77,6 +80,32 @@ const AdminDashboard = () => {
         } catch (error) {
             alert("Failed to create department");
         }
+    };
+
+    const handleDownloadStudents = (cls) => {
+        if (!cls.students || cls.students.length === 0) return;
+        const headers = ['Name', 'Email', 'Roll Number', 'Enrollment Number'];
+        const csvRows = [headers.join(',')];
+        
+        cls.students.forEach(student => {
+            const row = [
+                `"${student.name || ''}"`,
+                `"${student.email || ''}"`,
+                `"${student.rollNo || ''}"`,
+                `"${student.enrollmentNo || ''}"`
+            ];
+            csvRows.push(row.join(','));
+        });
+        
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${(cls.name || 'class').replace(/\s+/g, '_')}_students.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const filteredUsers = users.filter(u =>
@@ -179,7 +208,7 @@ const AdminDashboard = () => {
 
                 {/* Dashboard Nav */}
                 <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-none">
-                    {['users', 'departments'].map((t) => (
+                    {['users', 'departments', 'classes'].map((t) => (
                         <button
                             key={t}
                             onClick={() => setTab(t)}
@@ -320,6 +349,65 @@ const AdminDashboard = () => {
                                             Operational
                                         </div>
                                         <span className="opacity-40">System Node #{(dept._id.slice(-4)).toUpperCase()}</span>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+
+                {tab === 'classes' && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                            <div>
+                                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter">Class Directory</h2>
+                                <p className="text-slate-500 text-xs md:text-sm font-medium mt-1 uppercase tracking-wider opacity-60">View all created classes and enrollments</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-20">
+                            {classesList.map(cls => (
+                                <motion.div key={cls._id} whileHover={{ y: -5 }} className="card p-8 bg-slate-900/40 border-white/5 shadow-2xl relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-700">
+                                        <List className="w-20 h-20 text-white" />
+                                    </div>
+                                    <div className="flex items-center gap-4 mb-4 relative z-10">
+                                        <div className="px-4 py-2 bg-indigo-500/10 rounded-xl text-indigo-400 font-black text-xs border border-indigo-500/20 shadow-lg shadow-indigo-500/5">
+                                            {cls.classCode || 'NO-CODE'}
+                                        </div>
+                                        <h3 className="text-xl font-black text-white tracking-tight">{cls.name || 'Unnamed Class'}</h3>
+                                    </div>
+                                    <p className="text-sm text-slate-500 font-medium leading-relaxed mb-4 relative z-10">Teacher: {cls.user?.name || 'Unknown'}</p>
+                                    <p className="text-xs text-slate-400 font-medium mb-6 relative z-10">Subject: {cls.subject || 'General'}</p>
+
+                                    <div className="relative z-10">
+                                        <div className="flex justify-between items-center mb-3 border-b border-white/5 pb-2">
+                                            <h4 className="text-[10px] font-black uppercase text-slate-500">Enrolled Students ({cls.students?.length || 0})</h4>
+                                            {cls.students && cls.students.length > 0 && (
+                                                <button 
+                                                    onClick={() => handleDownloadStudents(cls)}
+                                                    className="flex items-center gap-1.5 px-2 py-1 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-md transition-all border border-white/5"
+                                                    title="Download student list as CSV"
+                                                >
+                                                    <Download className="w-3 h-3" />
+                                                    <span className="text-[8px] font-black uppercase tracking-wider">CSV</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                            {cls.students && cls.students.length > 0 ? (
+                                                <ul className="space-y-2">
+                                                    {cls.students.map(student => (
+                                                        <li key={student._id} className="text-xs text-slate-300 flex justify-between items-center bg-black/20 p-2 rounded-lg border border-white/5">
+                                                            <span className="font-medium">{student.name}</span>
+                                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{student.rollNo || student.enrollmentNo || 'N/A'}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <p className="text-xs text-slate-500 italic">No students enrolled.</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))}
