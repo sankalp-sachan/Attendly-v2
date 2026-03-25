@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, TrendingUp, Calendar, AlertCircle, ShieldCheck, Star } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Calendar, AlertCircle, ShieldCheck, Star, FileText, Download, Image, BookOpen } from 'lucide-react';
 import api from '../utils/api';
 
 const StudentClassDetails = () => {
@@ -12,6 +12,7 @@ const StudentClassDetails = () => {
     const [classData, setClassData] = useState(null);
     const [stats, setStats] = useState(null);
     const [history, setHistory] = useState([]);
+    const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const isUserCR = classData?.CRs?.some(id => (id._id || id) === user?._id);
@@ -24,6 +25,10 @@ const StudentClassDetails = () => {
                 setClassData(data.class);
                 setStats(data.stats);
                 setHistory(data.history);
+
+                // Fetch Notes
+                const { data: notesData } = await api.get(`/notes/${classId}`);
+                setNotes(notesData);
             } catch (error) {
                 console.error("Failed to fetch class details");
             } finally {
@@ -134,6 +139,62 @@ const StudentClassDetails = () => {
                         <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">{classData.targetPercentage}%</p>
                     </div>
                 </div>
+
+                <div className="mb-8">
+                    <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-8 bg-indigo-600 rounded-full" />
+                        Shared Academic Assets
+                    </h2>
+                </div>
+
+                {notes.length === 0 ? (
+                    <div className="p-12 mb-16 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5 opacity-60">
+                        <BookOpen className="w-12 h-12 text-slate-800 mx-auto mb-4 opacity-40" />
+                        <p className="text-slate-600 font-bold uppercase tracking-[0.25em] text-[10px]">No academic assets shared for this registry</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                        {notes.map((note) => (
+                            <motion.div
+                                key={note._id}
+                                whileHover={{ y: -5 }}
+                                className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className={`p-4 rounded-2xl ${note.fileType === 'pdf' ? 'bg-rose-500/10 text-rose-500' :
+                                        note.fileType === 'ppt' ? 'bg-amber-500/10 text-amber-500' :
+                                            note.fileType === 'image' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                'bg-primary-500/10 text-primary-500'
+                                        }`}>
+                                        {note.fileType === 'image' ? <Image className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
+                                    </div>
+                                    <a
+                                        href={`${api.defaults.baseURL.replace('/api', '')}${note.fileUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-3 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-primary-600 transition-all shadow-lg"
+                                        title="Download Asset"
+                                    >
+                                        <Download className="w-5 h-5" />
+                                    </a>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-black text-lg tracking-tight mb-2 truncate" title={note.title}>{note.title}</h4>
+                                    <p className="text-slate-500 text-[10px] font-bold leading-relaxed mb-4 line-clamp-2">{note.description || 'Reference material shared by your professor.'}</p>
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-[8px] text-slate-400 font-black">
+                                                {note.teacher?.name?.charAt(0)}
+                                            </div>
+                                            <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Prof. {note.teacher?.name}</span>
+                                        </div>
+                                        <span className="text-[8px] text-slate-600 font-bold uppercase">{new Date(note.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
 
                 <div className="mb-8">
                     <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">

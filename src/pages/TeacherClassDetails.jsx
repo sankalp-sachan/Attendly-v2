@@ -6,7 +6,7 @@ import {
     ChevronDown, UserCheck, Shield, BookOpen, AlertCircle, Save,
     ArrowLeft, MoreVertical, Download, FileText, Share2, MoreHorizontal,
     Printer, Loader2, Trophy, Clock, Trash2, Edit2, History, TrendingUp, XCircle, CheckCircle,
-    BarChart2, Star, ShieldCheck, Plus
+    BarChart2, Star, ShieldCheck, Plus, Upload, FileIcon, Image, Paperclip
 } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -31,8 +31,14 @@ const TeacherClassDetails = () => {
     const [history, setHistory] = useState([]);
     const [analytics, setAnalytics] = useState({ studentStats: [], dailyAnalytics: [] });
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('overview'); // overview, students, history, analytics, reports
+    const [activeTab, setActiveTab] = useState('overview'); // overview, students, history, analytics, reports, notes
     const [studentSearch, setStudentSearch] = useState('');
+    const [notes, setNotes] = useState([]);
+    const [showNoteUploadModal, setShowNoteUploadModal] = useState(false);
+    const [noteTitle, setNoteTitle] = useState('');
+    const [noteDescription, setNoteDescription] = useState('');
+    const [noteFile, setNoteFile] = useState(null);
+    const [isUploadingNote, setIsUploadingNote] = useState(false);
 
     // Attendance Modal state (reused logic)
     const [showAttendanceModal, setShowAttendanceModal] = useState(false);
@@ -59,10 +65,59 @@ const TeacherClassDetails = () => {
             // Fetch Analytics
             const { data: analyticsData } = await api.get(`/college/teacher/analytics/${classId}`);
             setAnalytics(analyticsData);
+
+            // Fetch Notes
+            fetchNotes();
         } catch (error) {
             console.error("Failed to fetch class details");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchNotes = async () => {
+        try {
+            const { data } = await api.get(`/notes/${classId}`);
+            setNotes(data);
+        } catch (error) {
+            console.error("Failed to fetch notes");
+        }
+    };
+
+    const handleNoteUpload = async (e) => {
+        e.preventDefault();
+        if (!noteFile || !noteTitle) return alert("Title and file are required");
+
+        setIsUploadingNote(true);
+        const formData = new FormData();
+        formData.append('note', noteFile);
+        formData.append('title', noteTitle);
+        formData.append('description', noteDescription);
+        formData.append('classId', classId);
+
+        try {
+            await api.post('/notes', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            setNoteTitle('');
+            setNoteDescription('');
+            setNoteFile(null);
+            setShowNoteUploadModal(false);
+            fetchNotes();
+        } catch (error) {
+            alert(error.response?.data?.message || "Failed to upload note");
+        } finally {
+            setIsUploadingNote(false);
+        }
+    };
+
+    const handleDeleteNote = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this note?")) return;
+        try {
+            await api.delete(`/notes/${id}`);
+            fetchNotes();
+        } catch (error) {
+            alert("Failed to delete note");
         }
     };
 
@@ -218,7 +273,7 @@ const TeacherClassDetails = () => {
 
                 {/* Tabs */}
                 <div className="flex gap-2 md:gap-4 mb-12 overflow-x-auto pb-4 scrollbar-none">
-                    {['overview', 'students', 'history', 'analytics', 'reports'].map((tab) => (
+                    {['overview', 'students', 'history', 'analytics', 'reports', 'notes'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -595,6 +650,82 @@ const TeacherClassDetails = () => {
                             )}
                         </div>
                     )}
+
+                    {activeTab === 'notes' && (
+                        <div className="space-y-8">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                                    <FileIcon className="w-6 h-6 text-primary-400" />
+                                    Shared Academic Assets
+                                </h3>
+                                <button
+                                    onClick={() => setShowNoteUploadModal(true)}
+                                    className="btn-primary px-6 py-3 rounded-xl text-[10px] uppercase font-black tracking-widest flex items-center gap-2"
+                                >
+                                    <Upload className="w-4 h-4" />
+                                    <span>Upload New Asset</span>
+                                </button>
+                            </div>
+
+                            {notes.length === 0 ? (
+                                <div className="p-20 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5">
+                                    <Paperclip className="w-16 h-16 text-slate-800 mx-auto mb-4 opacity-40" />
+                                    <p className="text-slate-600 font-black uppercase tracking-[0.25em] text-sm">No assets deployed to this registry yet</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {notes.map((note) => (
+                                        <motion.div
+                                            key={note._id}
+                                            whileHover={{ y: -5 }}
+                                            className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                                        >
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className={`p-4 rounded-2xl ${note.fileType === 'pdf' ? 'bg-rose-500/10 text-rose-500' :
+                                                    note.fileType === 'ppt' ? 'bg-amber-500/10 text-amber-500' :
+                                                        note.fileType === 'image' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                            'bg-primary-500/10 text-primary-500'
+                                                    }`}>
+                                                    {note.fileType === 'image' ? <Image className="w-8 h-8" /> : <FileText className="w-8 h-8" />}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <a
+                                                        href={`${api.defaults.baseURL.replace('/api', '')}${note.fileUrl}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white transition-colors"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </a>
+                                                    {(isTeacher || note.teacher._id === user?._id) && (
+                                                        <button
+                                                            onClick={() => handleDeleteNote(note._id)}
+                                                            className="p-2 rounded-lg bg-white/5 text-rose-500 hover:bg-rose-500/10 transition-colors"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-white font-black text-lg tracking-tight mb-2 truncate" title={note.title}>{note.title}</h4>
+                                                <p className="text-slate-500 text-xs font-bold leading-relaxed mb-4 line-clamp-2">{note.description || 'No description provided.'}</p>
+                                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-slate-400 font-black">
+                                                            {note.teacher?.name?.charAt(0)}
+                                                        </div>
+                                                        <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{note.teacher?.name}</span>
+                                                    </div>
+                                                    <span className="text-[9px] text-slate-600 font-bold uppercase">{new Date(note.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -868,6 +999,103 @@ const TeacherClassDetails = () => {
                     </div >
                 )}
             </AnimatePresence >
+
+            {/* Note Upload Modal */}
+            <AnimatePresence>
+                {showNoteUploadModal && (
+                    <div className="fixed inset-0 flex items-center justify-center z-[120] p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowNoteUploadModal(false)}
+                            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-md rounded-[2.5rem] border border-white/10 shadow-2xl relative z-10 p-8 md:p-10"
+                        >
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Deploy Asset</h2>
+                                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest mt-1">Registry: {classData.name}</p>
+                                </div>
+                                <button onClick={() => setShowNoteUploadModal(false)} className="p-2 rounded-xl hover:bg-white/5 text-slate-400">
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleNoteUpload} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Asset Designation</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g. Unit 1 - System Architecture"
+                                        value={noteTitle}
+                                        onChange={(e) => setNoteTitle(e.target.value)}
+                                        className="input-field bg-white/5 border-white/10"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Deployment Context (Optional)</label>
+                                    <textarea
+                                        placeholder="Enter brief description of the shared material..."
+                                        value={noteDescription}
+                                        onChange={(e) => setNoteDescription(e.target.value)}
+                                        className="input-field bg-white/5 border-white/10 min-h-[100px] py-4 resize-none"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Payload Source (PDF, PPT, Image)</label>
+                                    <div className="relative group">
+                                        <input
+                                            type="file"
+                                            required
+                                            accept=".pdf,.ppt,.pptx,.jpg,.jpeg,.png"
+                                            onChange={(e) => setNoteFile(e.target.files[0])}
+                                            className="hidden"
+                                            id="note-file-upload"
+                                        />
+                                        <label
+                                            htmlFor="note-file-upload"
+                                            className="flex flex-col items-center justify-center w-full min-h-[120px] rounded-3xl border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary-500/50 transition-all cursor-pointer group"
+                                        >
+                                            {noteFile ? (
+                                                <div className="flex flex-col items-center gap-2 p-4">
+                                                    <div className="p-3 bg-primary-500/20 rounded-2xl text-primary-400">
+                                                        <CheckCircle className="w-8 h-8" />
+                                                    </div>
+                                                    <span className="text-xs text-white font-black truncate max-w-[200px]">{noteFile.name}</span>
+                                                    <span className="text-[8px] text-slate-500 font-bold uppercase">Change File</span>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <Upload className="w-8 h-8 text-slate-600 mb-2 group-hover:text-primary-400 group-hover:scale-110 transition-all" />
+                                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Select Academic Payload</span>
+                                                </>
+                                            )}
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isUploadingNote}
+                                    className="w-full btn-primary h-14 rounded-2xl flex items-center justify-center gap-3 disabled:opacity-50"
+                                >
+                                    {isUploadingNote ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                                    <span className="text-[11px] font-black uppercase tracking-widest">Finalize Deployment</span>
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div >
     );
 };
