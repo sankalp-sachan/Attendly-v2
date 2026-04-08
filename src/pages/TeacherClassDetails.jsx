@@ -6,7 +6,7 @@ import {
     ChevronDown, UserCheck, Shield, BookOpen, AlertCircle, Save,
     ArrowLeft, MoreVertical, Download, FileText, Share2, MoreHorizontal,
     Printer, Loader2, Trophy, Clock, Trash2, Edit2, History, TrendingUp, XCircle, CheckCircle,
-    BarChart2, Star, ShieldCheck, Plus, Upload, FileIcon, Image, Paperclip
+    BarChart2, Star, ShieldCheck, Plus, Upload, FileIcon, Image, Paperclip, HelpCircle, Award
 } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -17,6 +17,7 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import ClassFeed from '../components/ClassFeed';
 
 const TeacherClassDetails = () => {
     const { classId } = useParams();
@@ -39,6 +40,8 @@ const TeacherClassDetails = () => {
     const [noteDescription, setNoteDescription] = useState('');
     const [noteFile, setNoteFile] = useState(null);
     const [isUploadingNote, setIsUploadingNote] = useState(false);
+    const [quizzes, setQuizzes] = useState([]);
+    const [isFetchingQuizzes, setIsFetchingQuizzes] = useState(false);
 
     // Attendance Modal state (reused logic)
     const [showAttendanceModal, setShowAttendanceModal] = useState(false);
@@ -68,6 +71,8 @@ const TeacherClassDetails = () => {
 
             // Fetch Notes
             fetchNotes();
+            // Fetch Quizzes
+            fetchQuizzes();
         } catch (error) {
             console.error("Failed to fetch class details");
         } finally {
@@ -81,6 +86,18 @@ const TeacherClassDetails = () => {
             setNotes(data);
         } catch (error) {
             console.error("Failed to fetch notes");
+        }
+    };
+
+    const fetchQuizzes = async () => {
+        setIsFetchingQuizzes(true);
+        try {
+            const { data } = await api.get(`/quizzes/class/${classId}`);
+            setQuizzes(data);
+        } catch (error) {
+            console.error("Failed to fetch quizzes");
+        } finally {
+            setIsFetchingQuizzes(false);
         }
     };
 
@@ -272,14 +289,14 @@ const TeacherClassDetails = () => {
                 </header>
 
                 {/* Tabs */}
-                <div className="flex gap-2 md:gap-4 mb-12 overflow-x-auto pb-4 scrollbar-none">
-                    {['overview', 'students', 'history', 'analytics', 'reports', 'notes'].map((tab) => (
+                <div className="flex gap-4 p-1.5 bg-slate-900/50 backdrop-blur-xl rounded-[2rem] mb-12 border border-white/5 w-fit mx-auto overflow-x-auto scrollbar-none shadow-2xl">
+                    {['overview', 'feed', 'students', 'history', 'analytics', 'reports', 'notes', 'quizzes'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${activeTab === tab
-                                ? 'bg-primary-600 text-white border-primary-500 shadow-xl shadow-primary-500/20'
-                                : 'bg-white/5 text-slate-500 border-white/5 hover:text-white hover:bg-white/10'
+                            className={`px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === tab
+                                ? 'bg-primary-500 text-white shadow-[0_0_25px_rgba(59,130,246,0.3)]'
+                                : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
                                 }`}
                         >
                             {tab}
@@ -289,6 +306,9 @@ const TeacherClassDetails = () => {
 
                 {/* Tab Content */}
                 <div className="min-h-[500px]">
+                    {activeTab === 'feed' && (
+                        <ClassFeed classId={classId} />
+                    )}
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                             <motion.div
@@ -718,6 +738,87 @@ const TeacherClassDetails = () => {
                                                         <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{note.teacher?.name}</span>
                                                     </div>
                                                     <span className="text-[9px] text-slate-600 font-bold uppercase">{new Date(note.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'quizzes' && (
+                        <div className="space-y-8">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                                    <HelpCircle className="w-6 h-6 text-primary-400" />
+                                    Evaluation Matrix
+                                </h3>
+                                <button
+                                    onClick={() => navigate(`/teacher/classes/${classId}/quiz/create`)}
+                                    className="btn-primary px-6 py-3 rounded-xl text-[10px] uppercase font-black tracking-widest flex items-center gap-2"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    <span>Forge New Quiz</span>
+                                </button>
+                            </div>
+
+                            {quizzes.length === 0 ? (
+                                <div className="p-20 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5">
+                                    <Award className="w-16 h-16 text-slate-800 mx-auto mb-4 opacity-40" />
+                                    <p className="text-slate-600 font-black uppercase tracking-[0.25em] text-sm">No quizzes deployed to this registry</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {quizzes.map((quiz) => (
+                                        <motion.div
+                                            key={quiz._id}
+                                            whileHover={{ y: -5 }}
+                                            className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                                        >
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="p-4 rounded-2xl bg-primary-500/10 text-primary-500">
+                                                    <HelpCircle className="w-8 h-8" />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => navigate(`/teacher/classes/${classId}/quiz/${quiz._id}/results`)}
+                                                        className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white transition-colors"
+                                                        title="View Results"
+                                                    >
+                                                        <BarChart2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            try {
+                                                                const response = await api.get(`/quizzes/${quiz._id}/export`, { responseType: 'blob' });
+                                                                const url = window.URL.createObjectURL(new Blob([response.data]));
+                                                                const link = document.createElement('a');
+                                                                link.href = url;
+                                                                link.setAttribute('download', `Quiz_Results_${quiz.title}.xlsx`);
+                                                                document.body.appendChild(link);
+                                                                link.click();
+                                                                link.remove();
+                                                            } catch (error) {
+                                                                alert("Export failed");
+                                                            }
+                                                        }}
+                                                        className="p-2 rounded-lg bg-white/5 text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+                                                        title="Export Excel"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-white font-black text-lg tracking-tight mb-2 truncate" title={quiz.title}>{quiz.title}</h4>
+                                                <p className="text-slate-500 text-xs font-bold leading-relaxed mb-4 line-clamp-2">{quiz.description || 'Knowledge evaluation module.'}</p>
+                                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="w-3 h-3 text-slate-500" />
+                                                        <span className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{quiz.duration} MIN</span>
+                                                    </div>
+                                                    <span className="text-[9px] text-slate-600 font-bold uppercase">{new Date(quiz.createdAt).toLocaleDateString()}</span>
                                                 </div>
                                             </div>
                                         </motion.div>

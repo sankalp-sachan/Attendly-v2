@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, TrendingUp, Calendar, AlertCircle, ShieldCheck, Star, FileText, Download, Image, BookOpen } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Calendar, AlertCircle, ShieldCheck, Star, FileText, Download, Image, BookOpen, HelpCircle, Award, Clock } from 'lucide-react';
 import api from '../utils/api';
+import ClassFeed from '../components/ClassFeed';
 
 const StudentClassDetails = () => {
     const { classId } = useParams();
@@ -13,6 +14,7 @@ const StudentClassDetails = () => {
     const [stats, setStats] = useState(null);
     const [history, setHistory] = useState([]);
     const [notes, setNotes] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const isUserCR = classData?.CRs?.some(id => (id._id || id) === user?._id);
@@ -29,6 +31,10 @@ const StudentClassDetails = () => {
                 // Fetch Notes
                 const { data: notesData } = await api.get(`/notes/${classId}`);
                 setNotes(notesData);
+
+                // Fetch Quizzes
+                const { data: quizzesData } = await api.get(`/quizzes/class/${classId}`);
+                setQuizzes(quizzesData);
             } catch (error) {
                 console.error("Failed to fetch class details");
             } finally {
@@ -140,6 +146,17 @@ const StudentClassDetails = () => {
                     </div>
                 </div>
 
+                <div className="mb-8 mt-4">
+                    <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-8 bg-primary-600 rounded-full" />
+                        Class Synergy Hub
+                    </h2>
+                </div>
+
+                <div className="mb-16">
+                    <ClassFeed classId={classId} />
+                </div>
+
                 <div className="mb-8">
                     <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
                         <div className="w-2 h-8 bg-indigo-600 rounded-full" />
@@ -189,6 +206,58 @@ const StudentClassDetails = () => {
                                             <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Prof. {note.teacher?.name}</span>
                                         </div>
                                         <span className="text-[8px] text-slate-600 font-bold uppercase">{new Date(note.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="mb-8">
+                    <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-8 bg-emerald-600 rounded-full" />
+                        Evaluation Hub
+                    </h2>
+                </div>
+
+                {quizzes.length === 0 ? (
+                    <div className="p-12 mb-16 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5 opacity-60">
+                        <Award className="w-12 h-12 text-slate-800 mx-auto mb-4 opacity-40" />
+                        <p className="text-slate-600 font-bold uppercase tracking-[0.25em] text-[10px]">No active evaluation sessions available</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                        {quizzes.map((quiz) => (
+                            <motion.div
+                                key={quiz._id}
+                                whileHover={{ y: -5 }}
+                                className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500">
+                                        <HelpCircle className="w-6 h-6" />
+                                    </div>
+                                    <button
+                                        onClick={() => navigate(`/student/classes/${classId}/quiz/${quiz._id}/take`)}
+                                        className="px-6 py-3 rounded-xl bg-primary-600 text-white hover:bg-primary-500 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary-500/20"
+                                    >
+                                        Attempt Quiz
+                                    </button>
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-black text-lg tracking-tight mb-2 truncate" title={quiz.title}>{quiz.title}</h4>
+                                    <p className="text-slate-500 text-[10px] font-bold leading-relaxed mb-4 line-clamp-2">{quiz.description || 'Module Knowledge Assessment.'}</p>
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-3 h-3 text-slate-500" />
+                                            <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest">{quiz.duration} MIN</span>
+                                        </div>
+                                        <button 
+                                            onClick={() => navigate(`/student/classes/${classId}/quiz/${quiz._id}/result`)}
+                                            className="text-[8px] text-primary-400 font-black uppercase tracking-widest hover:text-white transition-colors"
+                                        >
+                                            View Score
+                                        </button>
                                     </div>
                                 </div>
                             </motion.div>

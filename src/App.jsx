@@ -34,6 +34,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import AboutDeveloper from './pages/AboutDeveloper';
 import AboutApp from './pages/AboutApp';
+import QuizCreate from './pages/Quiz/QuizCreate';
+import QuizTake from './pages/Quiz/QuizTake';
+import QuizTeacherResults from './pages/Quiz/QuizTeacherResults';
+import QuizResultView from './pages/Quiz/QuizResultView';
 
 function App() {
   const [loading, setLoading] = React.useState(() => {
@@ -114,6 +118,22 @@ function App() {
                       </RoleRoute>
                     }
                   />
+                  <Route
+                    path="/teacher/classes/:classId/quiz/create"
+                    element={
+                      <RoleRoute allowedRoles={['teacher', 'mentor']}>
+                        <QuizCreate />
+                      </RoleRoute>
+                    }
+                  />
+                  <Route
+                    path="/teacher/classes/:classId/quiz/:id/results"
+                    element={
+                      <RoleRoute allowedRoles={['teacher', 'mentor']}>
+                        <QuizTeacherResults />
+                      </RoleRoute>
+                    }
+                  />
 
                   {/* Student & CR Routes */}
                   <Route
@@ -129,6 +149,22 @@ function App() {
                     element={
                       <RoleRoute allowedRoles={['student', 'cr', 'mentor']}>
                         <StudentClassDetails />
+                      </RoleRoute>
+                    }
+                  />
+                  <Route
+                    path="/student/classes/:classId/quiz/:id/take"
+                    element={
+                      <RoleRoute allowedRoles={['student', 'cr', 'mentor']}>
+                        <QuizTake />
+                      </RoleRoute>
+                    }
+                  />
+                  <Route
+                    path="/student/classes/:classId/quiz/:id/result"
+                    element={
+                      <RoleRoute allowedRoles={['student', 'cr', 'mentor']}>
+                        <QuizResultView />
                       </RoleRoute>
                     }
                   />

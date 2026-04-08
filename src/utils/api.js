@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const api = axios.create({
-    baseURL: 'https://attendly-v2-backend.onrender.com/api',
+    baseURL: isLocal ? 'http://localhost:5000/api' : 'https://attendly-v2-backend.onrender.com/api',
 });
 
 // Add a request interceptor to attach the token
