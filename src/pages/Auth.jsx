@@ -19,8 +19,11 @@ const Auth = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isOnboarding, setIsOnboarding] = useState(false);
+    const [isOTPVerification, setIsOTPVerification] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [verificationEmail, setVerificationEmail] = useState('');
 
-    const { login, register, googleLogin, updateUserProfile } = useAuth();
+    const { login, register, googleLogin, updateUserProfile, verifyOTP } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -35,9 +38,33 @@ const Auth = () => {
                 navigate('/');
             } else {
                 // Register Flow
-                await register(email, password, name, institute, role, department);
-                navigate('/');
+                const res = await register(email, password, name, institute, role, department);
+                if (res?.requiresVerification) {
+                    setVerificationEmail(res.email);
+                    setIsOTPVerification(true);
+                } else {
+                    navigate('/');
+                }
             }
+        } catch (err) {
+            if (err.isUnverified) {
+                setVerificationEmail(err.email);
+                setIsOTPVerification(true);
+            } else {
+                setError(err.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOTPSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+            await verifyOTP(verificationEmail, otp);
+            navigate('/');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -185,10 +212,10 @@ const Auth = () => {
 
                     <div className="mb-8">
                         <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
-                            {isOnboarding ? 'Complete Profile' : (isLogin ? 'Welcome Back.' : 'Get Started.')}
+                            {isOTPVerification ? 'Verify Email' : isOnboarding ? 'Complete Profile' : (isLogin ? 'Welcome Back.' : 'Get Started.')}
                         </h3>
                         {/* Tab Switcher - Compact */}
-                        {!isOnboarding && (
+                        {!isOnboarding && !isOTPVerification && (
                             <div className="flex bg-slate-800/50 p-1 rounded-xl md:rounded-2xl mt-5 w-fit border border-white/5 relative">
                                 <button
                                     onClick={() => setIsLogin(true)}
@@ -219,7 +246,32 @@ const Auth = () => {
                     </div>
 
                     <div className="space-y-5 md:space-y-6">
-                        {isOnboarding ? (
+                        {isOTPVerification ? (
+                            <form onSubmit={handleOTPSubmit} className="space-y-5 md:space-y-6">
+                                <p className="text-sm text-slate-400">An OTP has been sent to your email. It is valid for 10 minutes.</p>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Secure OTP</label>
+                                    <div className="relative group">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-primary-500 transition-colors" />
+                                        <input type="text" required value={otp} onChange={e => setOtp(e.target.value)} placeholder="000000" className="input-field pl-12 tracking-[0.5em] font-bold" />
+                                    </div>
+                                </div>
+                                
+                                {error && (
+                                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="p-3 md:p-4 bg-red-500/10 border border-red-500/20 rounded-xl md:rounded-2xl text-red-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 md:gap-3">
+                                        <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                <button type="submit" disabled={loading} className="w-full btn-primary py-4 md:py-5 rounded-2xl text-base md:text-lg shadow-2xl shadow-primary-500/20">
+                                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Verify & Continue'}
+                                </button>
+                                <div className="text-center mt-4">
+                                     <button type="button" onClick={() => setIsOTPVerification(false)} className="text-sm text-slate-400 hover:text-white transition-colors">Back to Login</button>
+                                </div>
+                            </form>
+                        ) : isOnboarding ? (
                             <form onSubmit={handleOnboardingSubmit} className="space-y-5 md:space-y-6">
                                 <div className="space-y-2">
                                     <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Institute Verification</label>
@@ -228,6 +280,14 @@ const Auth = () => {
                                         <input type="text" required value={institute} onChange={e => setInstitute(e.target.value)} placeholder="University Name" className="input-field pl-12" />
                                     </div>
                                 </div>
+                                
+                                {error && (
+                                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="p-3 md:p-4 bg-red-500/10 border border-red-500/20 rounded-xl md:rounded-2xl text-red-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 md:gap-3">
+                                        <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                        {error}
+                                    </motion.div>
+                                )}
+
                                 <button type="submit" disabled={loading} className="w-full btn-primary py-4 md:py-5 rounded-2xl text-base md:text-lg shadow-2xl shadow-primary-500/20">
                                     {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Complete Setup'}
                                 </button>
@@ -302,7 +362,7 @@ const Auth = () => {
                             </form>
                         )}
 
-                        {!isOnboarding && (
+                        {!isOnboarding && !isOTPVerification && (
                             <div className="pt-4 md:pt-6 relative">
                                 <div className="absolute inset-0 flex items-center" aria-hidden="true">
                                     <div className="w-full border-t border-white/5"></div>

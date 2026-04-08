@@ -68,13 +68,23 @@ export const AuthProvider = ({ children }) => {
             return data;
         } catch (error) {
             // Check if error is due to unverified account
-            if (error.response?.status === 401 && error.response?.data?.isUnverified) {
+            if (error.response?.status === 403 && error.response?.data?.isVerified === false) {
                 const err = new Error(error.response.data.message);
                 err.isUnverified = true;
                 err.email = error.response.data.email;
                 throw err;
             }
             throw new Error(error.response?.data?.message || 'Invalid email or password');
+        }
+    };
+
+    const verifyOTP = async (email, otp) => {
+        try {
+            const { data } = await api.post('/users/verify-otp', { email, otp });
+            setUser(data);
+            return data;
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'OTP verification failed');
         }
     };
 
@@ -124,7 +134,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, googleLogin, updateUserProfile, logout, deleteUser }}>
+        <AuthContext.Provider value={{ user, login, register, googleLogin, updateUserProfile, logout, deleteUser, verifyOTP }}>
             {children}
         </AuthContext.Provider>
     );
