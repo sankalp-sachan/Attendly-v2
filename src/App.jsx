@@ -183,8 +183,8 @@ function App() {
                   {/* Catch all */}
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
+                <AIAssistant />
               </Router>
-              <AIAssistant />
             </motion.div>
           )}
         </AnimatePresence>

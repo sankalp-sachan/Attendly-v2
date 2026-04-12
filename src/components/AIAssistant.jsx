@@ -49,7 +49,7 @@ const AIAssistant = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsOpen(true)}
-                className={`fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary-600 text-white shadow-2xl z-[9999] flex items-center justify-center border border-white/20 transition-all ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                className={`fixed bottom-6 right-6 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] z-[99999] flex items-center justify-center border border-white/20 transition-all ${isOpen ? 'opacity-0 scale-0 pointer-events-none' : 'opacity-100 scale-100'}`}
             >
                 <Sparkles className="w-6 h-6 animate-pulse" />
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#020617]" />
