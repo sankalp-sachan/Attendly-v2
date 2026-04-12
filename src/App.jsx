@@ -30,6 +30,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import SplashScreen from './components/SplashScreen';
 import InstallOverlay from './components/InstallOverlay';
 import SessionWarning from './components/SessionWarning';
+import AIAssistant from './components/AIAssistant';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import AboutDeveloper from './pages/AboutDeveloper';
@@ -183,6 +184,7 @@ function App() {
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </Router>
+              <AIAssistant />
             </motion.div>
           )}
         </AnimatePresence>

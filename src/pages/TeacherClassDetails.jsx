@@ -43,6 +43,11 @@ const TeacherClassDetails = () => {
     const [quizzes, setQuizzes] = useState([]);
     const [isFetchingQuizzes, setIsFetchingQuizzes] = useState(false);
 
+    // AI Syllabus state
+    const [syllabusText, setSyllabusText] = useState('');
+    const [syllabusSummary, setSyllabusSummary] = useState('');
+    const [loadingSyllabus, setLoadingSyllabus] = useState(false);
+
     // Attendance Modal state (reused logic)
     const [showAttendanceModal, setShowAttendanceModal] = useState(false);
     const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
@@ -224,6 +229,21 @@ const TeacherClassDetails = () => {
         }
     };
 
+    const handleSummarizeSyllabus = async () => {
+        if (!syllabusText.trim()) return;
+        try {
+            setLoadingSyllabus(true);
+            const { data } = await api.post(`/college/teacher/classes/${classId}/syllabus-summary`, {
+                syllabusText
+            });
+            setSyllabusSummary(data.summary);
+        } catch (error) {
+            setSyllabusSummary("Failed to generate summary. Please check your text or try again later.");
+        } finally {
+            setLoadingSyllabus(false);
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen grid place-items-center bg-slate-50 dark:bg-slate-950">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -393,6 +413,49 @@ const TeacherClassDetails = () => {
                                             />
                                         </LineChart>
                                     </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-3 mt-4 card p-6 md:p-8 bg-slate-900/40 border-white/5 relative overflow-hidden flex flex-col gap-4 shadow-2xl">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="p-3 bg-violet-500/10 rounded-2xl text-violet-400 border border-violet-500/20">
+                                        <BookOpen className="w-5 h-5 md:w-6 md:h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl md:text-2xl font-black text-white tracking-tight">AI Syllabus Intelligence</h3>
+                                        <p className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Paste your syllabus to instantly extract key modules and objectives</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-6">
+                                    <div className="flex-1 flex flex-col gap-4 relative">
+                                        <textarea
+                                            className="input-field min-h-[160px] resize-none text-sm placeholder:text-slate-600 bg-black/20"
+                                            placeholder="Paste syllabus text here..."
+                                            value={syllabusText}
+                                            onChange={(e) => setSyllabusText(e.target.value)}
+                                        ></textarea>
+                                        <button
+                                            onClick={handleSummarizeSyllabus}
+                                            disabled={loadingSyllabus || !syllabusText.trim()}
+                                            className="btn-primary w-full py-4 text-[10px] md:text-xs tracking-widest font-black uppercase disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-primary-500/20 flex items-center justify-center gap-2"
+                                        >
+                                            {loadingSyllabus ? (
+                                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                <>✨ Summarize Concept Pattern</>
+                                            )}
+                                        </button>
+                                    </div>
+
+                                    {syllabusSummary && (
+                                        <div className="flex-1 bg-violet-500/5 border border-violet-500/20 rounded-[1.5rem] p-6 relative overflow-y-auto max-h-[220px] custom-scrollbar shadow-inner">
+                                            <span className="absolute -top-3 left-6 px-3 py-1 bg-[#020617] border border-violet-500/30 text-[8px] font-black uppercase text-violet-400 rounded-lg tracking-[0.2em] shadow-lg">Groq Insight</span>
+                                            <div className="text-sm text-violet-200/90 leading-relaxed whitespace-pre-wrap mt-2 font-medium">
+                                                {syllabusSummary}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

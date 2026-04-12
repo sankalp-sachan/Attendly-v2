@@ -16,6 +16,13 @@ const StudentClassDetails = () => {
     const [notes, setNotes] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [aiInsight, setAiInsight] = useState('');
+    const [loadingAi, setLoadingAi] = useState(false);
+    
+    // Syllabus Summarizer State
+    const [syllabusText, setSyllabusText] = useState('');
+    const [syllabusSummary, setSyllabusSummary] = useState('');
+    const [loadingSyllabus, setLoadingSyllabus] = useState(false);
 
     const isUserCR = classData?.CRs?.some(id => (id._id || id) === user?._id);
     const isUserMentor = classData?.mentors?.some(id => (id._id || id) === user?._id);
@@ -43,6 +50,37 @@ const StudentClassDetails = () => {
         };
         fetchClassDetails();
     }, [classId]);
+
+    const fetchAiInsight = async () => {
+        try {
+            setLoadingAi(true);
+            const { data } = await api.post(`/college/student/classes/${classId}/ai-insight`, {
+                present: stats.present || 0,
+                total: stats.total || 0,
+                target: classData.targetPercentage
+            });
+            setAiInsight(data.insight);
+        } catch (error) {
+            setAiInsight("AI insight temporarily unavailable or key missing.");
+        } finally {
+            setLoadingAi(false);
+        }
+    };
+
+    const handleSummarizeSyllabus = async () => {
+        if (!syllabusText.trim()) return;
+        try {
+            setLoadingSyllabus(true);
+            const { data } = await api.post(`/college/student/classes/${classId}/syllabus-summary`, {
+                syllabusText
+            });
+            setSyllabusSummary(data.summary);
+        } catch (error) {
+            setSyllabusSummary("Failed to generate summary. Please check your text or try again later.");
+        } finally {
+            setLoadingSyllabus(false);
+        }
+    };
 
     if (loading) return (
         <div className="min-h-screen grid place-items-center bg-slate-50 dark:bg-slate-950">
@@ -143,6 +181,88 @@ const StudentClassDetails = () => {
                         <AlertCircle className="w-10 h-10 text-amber-500 mb-6 opacity-80" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Target Benchmark</h3>
                         <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">{classData.targetPercentage}%</p>
+                        {(() => {
+                            const target = parseFloat(classData.targetPercentage) / 100;
+                            const present = stats?.present || 0;
+                            const total = stats?.total || 0;
+                            if (total === 0) return <p className="mt-4 text-[10px] uppercase font-black tracking-widest text-slate-500">No classes held yet</p>;
+                            const current = present / total;
+                            
+                            if (current < target) {
+                                let x = Math.ceil((target * total - present) / (1 - target));
+                                if (x < 0) x = 0;
+                                return <p className="mt-4 text-[10px] uppercase font-black tracking-widest text-rose-400">Must attend next {x} class{x !== 1 ? 'es' : ''} to reach target</p>;
+                            } else {
+                                let y = Math.floor((present - target * total) / target);
+                                if (y === 0) return <p className="mt-4 text-[10px] uppercase font-black tracking-widest text-amber-400">On track. Cannot skip the next class.</p>;
+                                return <p className="mt-4 text-[10px] uppercase font-black tracking-widest text-emerald-400">Safe to skip {y} class{y !== 1 ? 'es' : ''}</p>;
+                            }
+                        })()}
+                        <div className="mt-6 border-t border-white/5 pt-4">
+                            {!aiInsight ? (
+                                <button
+                                    onClick={fetchAiInsight}
+                                    disabled={loadingAi}
+                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-all text-[10px] uppercase font-black tracking-widest border border-indigo-500/20 disabled:opacity-50"
+                                >
+                                    {loadingAi ? (
+                                        <span className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                                    ) : (
+                                        <>✨ Get Groq AI Insights</>
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-300 leading-relaxed relative mt-2 text-justify line-clamp-4 hover:line-clamp-none transition-all duration-300">
+                                    <span className="absolute -top-2 left-4 px-2 bg-[#020617] border border-indigo-500/auto text-[8px] font-black uppercase text-indigo-400 rounded tracking-[0.2em]">Groq AI Helper</span>
+                                    {aiInsight}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mb-16">
+                    <div className="card p-6 md:p-8 bg-slate-900/40 border-white/5 relative overflow-hidden flex flex-col gap-4 shadow-2xl">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-3 bg-violet-500/10 rounded-2xl text-violet-400 border border-violet-500/20">
+                                <BookOpen className="w-5 h-5 md:w-6 md:h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl md:text-2xl font-black text-white tracking-tight">AI Syllabus Intelligence</h3>
+                                <p className="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Paste syllabus to instantly extract key modules and objectives</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-6">
+                            <div className="flex-1 flex flex-col gap-4 relative">
+                                <textarea
+                                    className="input-field min-h-[160px] resize-none text-sm placeholder:text-slate-600 bg-black/20"
+                                    placeholder="Paste syllabus text here..."
+                                    value={syllabusText}
+                                    onChange={(e) => setSyllabusText(e.target.value)}
+                                ></textarea>
+                                <button
+                                    onClick={handleSummarizeSyllabus}
+                                    disabled={loadingSyllabus || !syllabusText.trim()}
+                                    className="btn-primary w-full py-4 text-[10px] md:text-xs tracking-widest font-black uppercase disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-primary-500/20 flex items-center justify-center gap-2"
+                                >
+                                    {loadingSyllabus ? (
+                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        <>✨ Summarize Pattern</>
+                                    )}
+                                </button>
+                            </div>
+
+                            {syllabusSummary && (
+                                <div className="flex-1 bg-violet-500/5 border border-violet-500/20 rounded-[1.5rem] p-6 relative overflow-y-auto max-h-[220px] custom-scrollbar shadow-inner">
+                                    <span className="absolute -top-3 left-6 px-3 py-1 bg-[#020617] border border-violet-500/30 text-[8px] font-black uppercase text-violet-400 rounded-lg tracking-[0.2em] shadow-lg">Groq Insight</span>
+                                    <div className="text-sm text-violet-200/90 leading-relaxed whitespace-pre-wrap mt-2 font-medium">
+                                        {syllabusSummary}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

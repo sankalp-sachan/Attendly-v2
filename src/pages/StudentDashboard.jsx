@@ -6,6 +6,31 @@ import api from '../utils/api';
 
 import { useNavigate } from 'react-router-dom';
 
+const calculatePrediction = (present, total, targetPercentageStr) => {
+    if (total === 0) return { text: "No classes held yet", type: 'neutral' };
+    const target = parseFloat(targetPercentageStr) / 100;
+    const current = present / total;
+    
+    if (current < target) {
+        let requiredClasses = Math.ceil((target * total - present) / (1 - target));
+        if (requiredClasses < 0) requiredClasses = 0; 
+        return { 
+            text: `Must attend next ${requiredClasses} class${requiredClasses !== 1 ? 'es' : ''} to reach ${targetPercentageStr}%`,
+            type: 'danger'
+        };
+    } else {
+        let skippableClasses = Math.floor((present - target * total) / target);
+        if (skippableClasses === 0) return {
+            text: `On track. Cannot skip the next class.`,
+            type: 'warning'
+        };
+        return {
+            text: `Safe to skip ${skippableClasses} class${skippableClasses !== 1 ? 'es' : ''}`,
+            type: 'success'
+        };
+    }
+};
+
 const StudentDashboard = () => {
     const { user, logout, updateUserProfile } = useAuth();
     const navigate = useNavigate();
@@ -277,7 +302,7 @@ const StudentDashboard = () => {
                                                 Target: {cls.targetPercentage}%
                                             </span>
                                         </div>
-                                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden mb-4 border border-white/5">
+                                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden mb-2 border border-white/5">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${cls.attendanceStats?.percentage}%` }}
@@ -286,6 +311,23 @@ const StudentDashboard = () => {
                                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }}></div>
                                             </motion.div>
                                         </div>
+                                        {(() => {
+                                            const prediction = calculatePrediction(
+                                                cls.attendanceStats?.present || 0,
+                                                cls.attendanceStats?.total || 0,
+                                                cls.targetPercentage
+                                            );
+                                            return (
+                                                <div className={`mb-4 text-[9px] font-bold uppercase tracking-widest ${
+                                                    prediction.type === 'danger' ? 'text-rose-400' :
+                                                    prediction.type === 'success' ? 'text-emerald-400' :
+                                                    prediction.type === 'warning' ? 'text-amber-400' :
+                                                    'text-slate-500'
+                                                }`}>
+                                                    {prediction.text}
+                                                </div>
+                                            );
+                                        })()}
                                         <button
                                             onClick={() => navigate(`/student/classes/${cls._id}`)}
                                             className="w-full py-3 bg-white/5 hover:bg-primary-600 text-slate-400 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-white/5 hover:border-primary-500 group/btn flex items-center justify-center gap-2"
