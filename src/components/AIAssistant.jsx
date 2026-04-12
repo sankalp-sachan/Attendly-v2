@@ -33,7 +33,8 @@ const AIAssistant = () => {
             });
             setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting right now. Please check your connection or try again later." }]);
+            const detail = error.response?.data?.details ? ` (${error.response.data.details})` : "";
+            setMessages(prev => [...prev, { role: 'assistant', content: `I'm having trouble connecting right now.${detail} Please ensure your API key is correctly set in the server environment.` }]);
         } finally {
             setIsLoading(false);
         }
