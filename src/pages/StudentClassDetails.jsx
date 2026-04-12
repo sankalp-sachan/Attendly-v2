@@ -208,12 +208,12 @@ const StudentClassDetails = () => {
                                     {loadingAi ? (
                                         <span className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
                                     ) : (
-                                        <>✨ Get Groq AI Insights</>
+                                        <>✨ Get AI Insights</>
                                     )}
                                 </button>
                             ) : (
                                 <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-300 leading-relaxed relative mt-2 text-justify line-clamp-4 hover:line-clamp-none transition-all duration-300">
-                                    <span className="absolute -top-2 left-4 px-2 bg-[#020617] border border-indigo-500/auto text-[8px] font-black uppercase text-indigo-400 rounded tracking-[0.2em]">Groq AI Helper</span>
+                                    <span className="absolute -top-2 left-4 px-2 bg-[#020617] border border-indigo-500/auto text-[8px] font-black uppercase text-indigo-400 rounded tracking-[0.2em]">AI Helper</span>
                                     {aiInsight}
                                 </div>
                             )}
@@ -256,7 +256,7 @@ const StudentClassDetails = () => {
 
                             {syllabusSummary && (
                                 <div className="flex-1 bg-violet-500/5 border border-violet-500/20 rounded-[1.5rem] p-6 relative overflow-y-auto max-h-[220px] custom-scrollbar shadow-inner">
-                                    <span className="absolute -top-3 left-6 px-3 py-1 bg-[#020617] border border-violet-500/30 text-[8px] font-black uppercase text-violet-400 rounded-lg tracking-[0.2em] shadow-lg">Groq Insight</span>
+                                    <span className="absolute -top-3 left-6 px-3 py-1 bg-[#020617] border border-violet-500/30 text-[8px] font-black uppercase text-violet-400 rounded-lg tracking-[0.2em] shadow-lg">AI Insight</span>
                                     <div className="text-sm text-violet-200/90 leading-relaxed whitespace-pre-wrap mt-2 font-medium">
                                         {syllabusSummary}
                                     </div>
