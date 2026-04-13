@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, TrendingUp, Calendar, AlertCircle, ShieldCheck, Star, FileText, Download, Image, BookOpen, HelpCircle, Award, Clock } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import api from '../utils/api';
 import ClassFeed from '../components/ClassFeed';
 
@@ -92,6 +93,37 @@ const StudentClassDetails = () => {
             setSyllabusSummary(`Failed to generate ${mode}. Please check your text or try again later.`);
         } finally {
             setLoadingSyllabus(false);
+        }
+    };
+
+    const downloadSyllabusContent = (format = 'pdf') => {
+        if (!syllabusSummary) return;
+
+        if (format === 'pdf') {
+            const doc = new jsPDF();
+            doc.setFontSize(20);
+            doc.text('Attendly AI Syllabus Asset', 14, 22);
+            doc.setFontSize(12);
+            doc.setTextColor(100);
+            doc.text(`Generated for: ${classData.name}`, 14, 30);
+            doc.text(`Subject: ${classData.subject}`, 14, 37);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 44);
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 50, 196, 50);
+
+            doc.setFontSize(11);
+            doc.setTextColor(0);
+            const splitText = doc.splitTextToSize(syllabusSummary, 170);
+            doc.text(splitText, 14, 60);
+            doc.save(`${classData.name}_Syllabus_AI.pdf`);
+        } else {
+            const element = document.createElement("a");
+            const file = new Blob([syllabusSummary], {type: 'text/plain'});
+            element.href = URL.createObjectURL(file);
+            element.download = `${classData.name}_Syllabus_Structure.txt`;
+            document.body.appendChild(element);
+            element.click();
         }
     };
 
@@ -319,10 +351,28 @@ const StudentClassDetails = () => {
                             </div>
 
                             {syllabusSummary && (
-                                <div className="flex-1 bg-violet-500/5 border border-violet-500/20 rounded-[1.5rem] p-6 relative overflow-y-auto max-h-[220px] custom-scrollbar shadow-inner">
-                                    <span className="absolute -top-3 left-6 px-3 py-1 bg-[#020617] border border-violet-500/30 text-[8px] font-black uppercase text-violet-400 rounded-lg tracking-[0.2em] shadow-lg">AI Insight</span>
-                                    <div className="text-sm text-violet-200/90 leading-relaxed whitespace-pre-wrap mt-2 font-medium">
-                                        {syllabusSummary}
+                                <div className="flex-1 flex flex-col gap-3">
+                                    <div className="bg-violet-500/5 border border-violet-500/20 rounded-[1.5rem] p-6 relative overflow-y-auto max-h-[220px] custom-scrollbar shadow-inner">
+                                        <span className="absolute -top-3 left-6 px-3 py-1 bg-[#020617] border border-violet-500/30 text-[8px] font-black uppercase text-violet-400 rounded-lg tracking-[0.2em] shadow-lg">AI Insight</span>
+                                        <div className="text-sm text-violet-200/90 leading-relaxed whitespace-pre-wrap mt-2 font-medium">
+                                            {syllabusSummary}
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button 
+                                            onClick={() => downloadSyllabusContent('pdf')}
+                                            className="flex-1 py-3 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl text-[9px] uppercase font-black tracking-widest flex items-center justify-center gap-2 hover:bg-rose-500/20 transition-all shadow-lg"
+                                        >
+                                            <Download className="w-3.5 h-3.5" />
+                                            Get PDF Asset
+                                        </button>
+                                        <button 
+                                            onClick={() => downloadSyllabusContent('txt')}
+                                            className="flex-1 py-3 bg-slate-800/40 text-slate-400 border border-white/5 rounded-xl text-[9px] uppercase font-black tracking-widest flex items-center justify-center gap-2 hover:bg-white/5 hover:text-white transition-all shadow-lg"
+                                        >
+                                            <FileText className="w-3.5 h-3.5" />
+                                            Download Outline
+                                        </button>
                                     </div>
                                 </div>
                             )}
