@@ -70,7 +70,8 @@ const TeacherClassDetails = () => {
 
     // Date filtering states
     const [historyFilterDate, setHistoryFilterDate] = useState('');
-    const [reportFilterDate, setReportFilterDate] = useState(new Date().toISOString().split('T')[0]);
+    const [reportStartDate, setReportStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0]);
+    const [reportEndDate, setReportEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [isDownloadingDaily, setIsDownloadingDaily] = useState(false);
 
     useEffect(() => {
@@ -215,6 +216,28 @@ const TeacherClassDetails = () => {
             link.remove();
         } catch (error) {
             alert(error.response?.data?.message || "Export failed. Please ensure records exist for this date.");
+        } finally {
+            setIsDownloadingDaily(false);
+        }
+    };
+
+    const handleExportRangeExcel = async () => {
+        if (!reportStartDate || !reportEndDate) return;
+        setIsDownloadingDaily(true);
+        try {
+            const response = await api.get(`/college/teacher/attendance/export-range/${classId}`, {
+                params: { startDate: reportStartDate, endDate: reportEndDate },
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Attendance_Range_${classData.name}_${reportStartDate}_to_${reportEndDate}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            alert("Export failed. Please ensure records exist for this range.");
         } finally {
             setIsDownloadingDaily(false);
         }
@@ -910,23 +933,39 @@ const TeacherClassDetails = () => {
                                 <div className="w-20 h-20 bg-primary-500/10 text-primary-500 rounded-[2rem] flex items-center justify-center mb-8 border border-primary-500/10 group-hover:scale-110 transition-transform">
                                     <Calendar className="w-10 h-10" />
                                 </div>
-                                <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Specific Date Registry</h3>
-                                <p className="text-slate-500 mb-6 font-bold text-sm leading-relaxed max-w-xs">Extract students data for a specific chronological checkpoint in Excel format.</p>
-                                <div className="w-full space-y-4">
-                                    <input 
-                                        type="date"
-                                        value={reportFilterDate}
-                                        max={new Date().toISOString().split('T')[0]}
-                                        onChange={(e) => setReportFilterDate(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-black text-xs outline-none focus:border-primary-500/50 transition-all cursor-pointer"
-                                    />
+                                <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Custom Range Registry</h3>
+                                <p className="text-slate-500 mb-6 font-bold text-sm leading-relaxed max-w-xs">Extract students data for a selected chronological range in Excel format.</p>
+                                <div className="w-full space-y-3">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-slate-600 uppercase tracking-widest ml-1">Start Date</label>
+                                            <input 
+                                                type="date"
+                                                value={reportStartDate}
+                                                max={reportEndDate}
+                                                onChange={(e) => setReportStartDate(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white font-black text-[10px] outline-none focus:border-primary-500/50 transition-all cursor-pointer"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-slate-600 uppercase tracking-widest ml-1">End Date</label>
+                                            <input 
+                                                type="date"
+                                                value={reportEndDate}
+                                                min={reportStartDate}
+                                                max={new Date().toISOString().split('T')[0]}
+                                                onChange={(e) => setReportEndDate(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white font-black text-[10px] outline-none focus:border-primary-500/50 transition-all cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
                                     <button 
-                                        onClick={() => handleExportDailyExcel(reportFilterDate)}
-                                        disabled={isDownloadingDaily || !reportFilterDate}
+                                        onClick={handleExportRangeExcel}
+                                        disabled={isDownloadingDaily || !reportStartDate || !reportEndDate}
                                         className="w-full btn-primary py-4 rounded-2xl flex items-center justify-center gap-3 group/btn disabled:opacity-50"
                                     >
                                         {isDownloadingDaily ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5 group-hover/btn:translate-y-1 transition-transform" />}
-                                        <span className="text-[10px] uppercase font-black tracking-widest">Export Checkpoint</span>
+                                        <span className="text-[10px] uppercase font-black tracking-widest">Export Range</span>
                                     </button>
                                 </div>
                             </motion.div>
