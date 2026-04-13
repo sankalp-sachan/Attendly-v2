@@ -436,9 +436,11 @@ const StudentClassDetails = () => {
                                             <a 
                                                 href={`${api.defaults.baseURL.replace('/api', '')}${assignment.fileUrl}`} 
                                                 target="_blank" 
-                                                className="text-primary-400 hover:text-primary-300 transition-colors"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-500/10 text-primary-400 hover:bg-primary-500/20 transition-all border border-primary-500/10 group/btn"
                                             >
-                                                <AlertCircle className="w-4 h-4" />
+                                                <FileText className="w-3 h-3 group-hover/btn:rotate-12 transition-transform" />
+                                                <span className="text-[8px] font-black uppercase tracking-[0.2em]">See Assignment</span>
                                             </a>
                                         )}
                                     </div>
