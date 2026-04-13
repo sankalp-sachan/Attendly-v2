@@ -63,6 +63,11 @@ const TeacherClassDetails = () => {
     const [isFetchingWeeklyReport, setIsFetchingWeeklyReport] = useState(false);
     const [isTabMenuOpen, setIsTabMenuOpen] = useState(false);
 
+    // Quiz Settings Modal state
+    const [showQuizSettingsModal, setShowQuizSettingsModal] = useState(false);
+    const [selectedQuiz, setSelectedQuiz] = useState(null);
+    const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+
     useEffect(() => {
         fetchClassDetails();
     }, [classId]);
@@ -262,6 +267,19 @@ const TeacherClassDetails = () => {
             setSyllabusSummary("Failed to generate summary. Please check your text or try again later.");
         } finally {
             setLoadingSyllabus(false);
+        }
+    };
+
+    const handleUpdateQuizSettings = async (quizId, settings) => {
+        setIsUpdatingSettings(true);
+        try {
+            await api.patch(`/quizzes/${quizId}/settings`, settings);
+            fetchQuizzes(); // Refresh quiz list
+            setShowQuizSettingsModal(false);
+        } catch (error) {
+            alert(error.response?.data?.message || "Failed to update quiz settings");
+        } finally {
+            setIsUpdatingSettings(false);
         }
     };
 
@@ -1040,6 +1058,16 @@ const TeacherClassDetails = () => {
                                                         <BarChart2 className="w-4 h-4" />
                                                     </button>
                                                     <button
+                                                        onClick={() => {
+                                                            setSelectedQuiz(quiz);
+                                                            setShowQuizSettingsModal(true);
+                                                        }}
+                                                        className="p-2 rounded-lg bg-white/5 text-indigo-400 hover:bg-indigo-400/10 transition-colors"
+                                                        title="Control Settings"
+                                                    >
+                                                        <Shield className="w-4 h-4" />
+                                                    </button>
+                                                    <button
                                                         onClick={async () => {
                                                             try {
                                                                 const response = await api.get(`/quizzes/${quiz._id}/export`, { responseType: 'blob' });
@@ -1448,7 +1476,93 @@ const TeacherClassDetails = () => {
                     </div>
                 )}
             </AnimatePresence>
-        </div >
+ 
+            {/* Quiz Settings Modal */}
+            <AnimatePresence>
+                {showQuizSettingsModal && selectedQuiz && (
+                    <div className="fixed inset-0 flex items-center justify-center z-[130] p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowQuizSettingsModal(false)}
+                            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-md rounded-[2.5rem] border border-white/10 shadow-2xl relative z-10 p-8 md:p-10"
+                        >
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Quiz Controls</h2>
+                                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest mt-1">{selectedQuiz.title}</p>
+                                </div>
+                                <button onClick={() => setShowQuizSettingsModal(false)} className="p-2 rounded-xl hover:bg-white/5 text-slate-400">
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-8">
+                                {/* Backtracking Toggle */}
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
+                                            <History className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Backtracking</p>
+                                            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Allow question re-visits</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleUpdateQuizSettings(selectedQuiz._id, { backtrackingEnabled: !selectedQuiz.backtrackingEnabled })}
+                                        className={`w-12 h-6 rounded-full relative transition-all duration-300 ${selectedQuiz.backtrackingEnabled ? 'bg-primary-600' : 'bg-slate-700'}`}
+                                    >
+                                        <motion.div
+                                            animate={{ x: selectedQuiz.backtrackingEnabled ? 24 : 2 }}
+                                            className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-lg"
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* Results Visibility Toggle */}
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400">
+                                            <Award className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none mb-1">Result Release</p>
+                                            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Show total score instantly</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleUpdateQuizSettings(selectedQuiz._id, { showResult: !selectedQuiz.showResult })}
+                                        className={`w-12 h-6 rounded-full relative transition-all duration-300 ${selectedQuiz.showResult ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                                    >
+                                        <motion.div
+                                            animate={{ x: selectedQuiz.showResult ? 24 : 2 }}
+                                            className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-lg"
+                                        />
+                                    </button>
+                                </div>
+
+                                <div className="p-4 bg-slate-900 border border-white/5 rounded-2xl">
+                                    <div className="flex gap-3 items-start">
+                                        <Info className="w-4 h-4 text-primary-400 mt-0.5 shrink-0" />
+                                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-[0.15em] leading-relaxed">
+                                            Changes to these controls take effect immediately for all active learners and future attempts.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 
