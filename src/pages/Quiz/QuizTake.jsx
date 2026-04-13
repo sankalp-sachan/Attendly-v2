@@ -20,6 +20,18 @@ const QuizTake = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isAuthorized && !isSubmitting) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isAuthorized, isSubmitting]);
+
+    useEffect(() => {
         if (isAuthorized && quiz) {
             setTimeLeft(quiz.duration * 60);
             const timer = setInterval(() => {
