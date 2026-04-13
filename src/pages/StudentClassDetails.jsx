@@ -24,6 +24,15 @@ const StudentClassDetails = () => {
     const [syllabusSummary, setSyllabusSummary] = useState('');
     const [loadingSyllabus, setLoadingSyllabus] = useState(false);
 
+    // Assignment State
+    const [assignments, setAssignments] = useState([]);
+    const [isFetchingAssignments, setIsFetchingAssignments] = useState(false);
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const [selectedAssignment, setSelectedAssignment] = useState(null);
+    const [responseText, setResponseText] = useState('');
+    const [submitFile, setSubmitFile] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const isUserCR = classData?.CRs?.some(id => (id._id || id) === user?._id);
     const isUserMentor = classData?.mentors?.some(id => (id._id || id) === user?._id);
 
@@ -42,6 +51,9 @@ const StudentClassDetails = () => {
                 // Fetch Quizzes
                 const { data: quizzesData } = await api.get(`/quizzes/class/${classId}`);
                 setQuizzes(quizzesData);
+
+                // Fetch Assignments
+                fetchAssignments();
             } catch (error) {
                 console.error("Failed to fetch class details");
             } finally {
@@ -79,6 +91,42 @@ const StudentClassDetails = () => {
             setSyllabusSummary("Failed to generate summary. Please check your text or try again later.");
         } finally {
             setLoadingSyllabus(false);
+        }
+    };
+
+    const fetchAssignments = async () => {
+        setIsFetchingAssignments(true);
+        try {
+            const { data } = await api.get(`/assignments/class/${classId}`);
+            setAssignments(data);
+        } catch (error) {
+            console.error("Failed to fetch assignments");
+        } finally {
+            setIsFetchingAssignments(false);
+        }
+    };
+
+    const handleSubmitAssignment = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const formData = new FormData();
+            formData.append('responseText', responseText);
+            if (submitFile) formData.append('file', submitFile);
+
+            await api.post(`/assignments/${selectedAssignment._id}/submit`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setShowSubmitModal(false);
+            setResponseText('');
+            setSubmitFile(null);
+            fetchAssignments();
+            alert("Response deployed successfully!");
+        } catch (error) {
+            alert("Failed to submit assignment");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -335,6 +383,78 @@ const StudentClassDetails = () => {
 
                 <div className="mb-8">
                     <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-8 bg-primary-600 rounded-full" />
+                        Task Directives
+                    </h2>
+                </div>
+
+                {assignments.length === 0 ? (
+                    <div className="p-12 mb-16 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5 opacity-60">
+                        <Star className="w-12 h-12 text-slate-800 mx-auto mb-4 opacity-40" />
+                        <p className="text-slate-600 font-bold uppercase tracking-[0.25em] text-[10px]">No task directives issued for this registry</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                        {assignments.map((assignment) => (
+                            <motion.div
+                                key={assignment._id}
+                                whileHover={{ y: -5 }}
+                                className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="p-4 rounded-2xl bg-primary-500/10 text-primary-500">
+                                        <Star className="w-6 h-6" />
+                                    </div>
+                                    {assignment.mySubmission ? (
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest">Synchronized</span>
+                                            {assignment.mySubmission.grade && (
+                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mr-1">Grade: {assignment.mySubmission.grade}</span>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedAssignment(assignment);
+                                                setShowSubmitModal(true);
+                                            }}
+                                            className="px-6 py-3 rounded-xl bg-primary-600 text-white hover:bg-primary-500 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary-500/20"
+                                        >
+                                            Submit Response
+                                        </button>
+                                    )}
+                                </div>
+                                <div>
+                                    <h4 className="text-white font-black text-lg tracking-tight mb-2 truncate" title={assignment.title}>{assignment.title}</h4>
+                                    <p className="text-slate-500 text-[10px] font-bold leading-relaxed mb-4 line-clamp-2">{assignment.description || 'Deliverable evaluation module.'}</p>
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-3 h-3 text-rose-400" />
+                                            <span className="text-[9px] text-rose-400 font-black uppercase tracking-widest">Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
+                                        </div>
+                                        {assignment.fileUrl && (
+                                            <a 
+                                                href={`${api.defaults.baseURL.replace('/api', '')}${assignment.fileUrl}`} 
+                                                target="_blank" 
+                                                className="text-primary-400 hover:text-primary-300 transition-colors"
+                                            >
+                                                <AlertCircle className="w-4 h-4" />
+                                            </a>
+                                        )}
+                                    </div>
+                                    {assignment.mySubmission?.feedback && (
+                                        <div className="mt-3 p-3 bg-primary-500/5 rounded-xl border border-primary-500/10 text-[9px] text-primary-300 font-medium italic">
+                                            Feedback: {assignment.mySubmission.feedback}
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="mb-8">
+                    <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
                         <div className="w-2 h-8 bg-emerald-600 rounded-full" />
                         Evaluation Hub
                     </h2>
@@ -433,6 +553,78 @@ const StudentClassDetails = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Submit Assignment Modal */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                        opacity: showSubmitModal ? 1 : 0, 
+                        visibility: showSubmitModal ? 'visible' : 'hidden' 
+                    }}
+                    className={`fixed inset-0 z-[150] flex items-center justify-center p-4 bg-[#020617]/80 backdrop-blur-xl transition-all duration-300 ${showSubmitModal ? '' : 'pointer-events-none'}`}
+                >
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={showSubmitModal ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+                        className="bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] border border-white/10 shadow-2xl p-8 md:p-10 relative"
+                    >
+                        <button onClick={() => setShowSubmitModal(false)} className="absolute top-8 right-8 text-slate-400 hover:text-white transition-colors">
+                            <ArrowLeft className="w-6 h-6" />
+                        </button>
+                        
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Deploy Response</h2>
+                            <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest mt-1">Task: {selectedAssignment?.title}</p>
+                        </div>
+
+                        <form onSubmit={handleSubmitAssignment} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contextual Response</label>
+                                <textarea
+                                    className="input-field min-h-[140px] resize-none text-sm bg-black/40 border-white/5 focus:border-primary-500/50"
+                                    placeholder="Enter your summary or feedback..."
+                                    value={responseText}
+                                    onChange={(e) => setResponseText(e.target.value)}
+                                ></textarea>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Asset Payload (Optional)</label>
+                                <input
+                                    type="file"
+                                    id="submit-file-assignment"
+                                    className="hidden"
+                                    onChange={(e) => setSubmitFile(e.target.files[0])}
+                                />
+                                <label 
+                                    htmlFor="submit-file-assignment"
+                                    className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary-500/30 transition-all cursor-pointer group"
+                                >
+                                    {submitFile ? (
+                                        <span className="text-xs text-white font-black truncate">{submitFile.name}</span>
+                                    ) : (
+                                        <>
+                                            <Download className="w-4 h-4 text-slate-500 group-hover:text-primary-400 transition-colors" />
+                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Select Deliverable</span>
+                                        </>
+                                    )}
+                                </label>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="btn-primary w-full py-5 rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20"
+                            >
+                                {isSubmitting ? (
+                                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+                                ) : (
+                                    "Finalize Deployment"
+                                )}
+                            </button>
+                        </form>
+                    </motion.div>
+                </motion.div>
             </div>
         </div>
     );

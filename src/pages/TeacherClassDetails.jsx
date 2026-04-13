@@ -68,6 +68,24 @@ const TeacherClassDetails = () => {
     const [selectedQuiz, setSelectedQuiz] = useState(null);
     const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
 
+    // Assignment state
+    const [assignments, setAssignments] = useState([]);
+    const [isFetchingAssignments, setIsFetchingAssignments] = useState(false);
+    const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+    const [assignmentTitle, setAssignmentTitle] = useState('');
+    const [assignmentDescription, setAssignmentDescription] = useState('');
+    const [assignmentDueDate, setAssignmentDueDate] = useState('');
+    const [assignmentFile, setAssignmentFile] = useState(null);
+    const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
+    const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
+    const [selectedAssignment, setSelectedAssignment] = useState(null);
+    const [submissions, setSubmissions] = useState([]);
+    const [isFetchingSubmissions, setIsFetchingSubmissions] = useState(false);
+    const [gradingSubmission, setGradingSubmission] = useState(null);
+    const [grade, setGrade] = useState('');
+    const [feedback, setFeedback] = useState('');
+    const [isSavingGrade, setIsSavingGrade] = useState(false);
+
     // Date filtering states
     const [historyFilterDate, setHistoryFilterDate] = useState('');
     const [reportStartDate, setReportStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0]);
@@ -92,6 +110,8 @@ const TeacherClassDetails = () => {
             fetchNotes();
             // Fetch Quizzes
             fetchQuizzes();
+            // Fetch Assignments
+            fetchAssignments();
         } catch (error) {
             console.error("Failed to fetch class details");
         } finally {
@@ -105,6 +125,87 @@ const TeacherClassDetails = () => {
             setNotes(data);
         } catch (error) {
             console.error("Failed to fetch notes");
+        }
+    };
+
+    const fetchAssignments = async () => {
+        setIsFetchingAssignments(true);
+        try {
+            const { data } = await api.get(`/assignments/class/${classId}`);
+            setAssignments(data);
+        } catch (error) {
+            console.error("Failed to fetch assignments");
+        } finally {
+            setIsFetchingAssignments(false);
+        }
+    };
+
+    const fetchSubmissions = async (assignmentId) => {
+        setIsFetchingSubmissions(true);
+        try {
+            const { data } = await api.get(`/assignments/${assignmentId}/submissions`);
+            setSubmissions(data);
+        } catch (error) {
+            console.error("Failed to fetch submissions");
+        } finally {
+            setIsFetchingSubmissions(false);
+        }
+    };
+
+    const handleCreateAssignment = async (e) => {
+        e.preventDefault();
+        setIsCreatingAssignment(true);
+        try {
+            const formData = new FormData();
+            formData.append('title', assignmentTitle);
+            formData.append('description', assignmentDescription);
+            formData.append('dueDate', assignmentDueDate);
+            formData.append('classId', classId);
+            if (assignmentFile) formData.append('file', assignmentFile);
+
+            await api.post('/assignments', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
+            setShowAssignmentModal(false);
+            setAssignmentTitle('');
+            setAssignmentDescription('');
+            setAssignmentDueDate('');
+            setAssignmentFile(null);
+            fetchAssignments();
+        } catch (error) {
+            alert("Failed to create assignment");
+        } finally {
+            setIsCreatingAssignment(false);
+        }
+    };
+
+    const handleGradeSubmission = async (e) => {
+        e.preventDefault();
+        setIsSavingGrade(true);
+        try {
+            await api.patch(`/assignments/submissions/${gradingSubmission._id}/grade`, {
+                grade,
+                feedback
+            });
+            setGradingSubmission(null);
+            setGrade('');
+            setFeedback('');
+            fetchSubmissions(selectedAssignment._id);
+        } catch (error) {
+            alert("Failed to save grade");
+        } finally {
+            setIsSavingGrade(false);
+        }
+    };
+
+    const handleDeleteAssignment = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this assignment? All submissions will be lost.")) return;
+        try {
+            await api.delete(`/assignments/${id}`);
+            fetchAssignments();
+        } catch (error) {
+            alert("Failed to delete assignment");
         }
     };
 
@@ -442,7 +543,7 @@ const TeacherClassDetails = () => {
                                     className="absolute top-full mt-4 z-50 w-full max-w-2xl bg-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden"
                                 >
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {['overview', 'weekly', 'feed', 'students', 'history', 'analytics', 'reports', 'notes', 'quizzes'].map((tab) => (
+                                        {['overview', 'weekly', 'feed', 'students', 'history', 'analytics', 'reports', 'notes', 'quizzes', 'assignments'].map((tab) => (
                                             <button
                                                 key={tab}
                                                 onClick={() => {
@@ -463,6 +564,7 @@ const TeacherClassDetails = () => {
                                                 {tab === 'reports' && <Download className="w-6 h-6" />}
                                                 {tab === 'notes' && <FileText className="w-6 h-6" />}
                                                 {tab === 'quizzes' && <HelpCircle className="w-6 h-6" />}
+                                                {tab === 'assignments' && <Briefcase className="w-6 h-6" />}
                                                 
                                                 <span className="text-[10px] font-black uppercase tracking-widest">
                                                     {tab === 'weekly' ? 'Weekly' : tab}
@@ -1223,6 +1325,88 @@ const TeacherClassDetails = () => {
                             )}
                         </div>
                     )}
+
+                    {activeTab === 'assignments' && (
+                        <div className="space-y-8">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-xl md:text-2xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
+                                    <Briefcase className="w-6 h-6 text-primary-400" />
+                                    Project Deployments
+                                </h3>
+                                <button
+                                    onClick={() => setShowAssignmentModal(true)}
+                                    className="btn-primary px-6 py-3 rounded-xl text-[10px] uppercase font-black tracking-widest flex items-center gap-2"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    <span>Deploy Task</span>
+                                </button>
+                            </div>
+
+                            {assignments.length === 0 ? (
+                                <div className="p-20 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5">
+                                    <BookOpen className="w-16 h-16 text-slate-800 mx-auto mb-4 opacity-40" />
+                                    <p className="text-slate-600 font-black uppercase tracking-[0.25em] text-sm">No tasks assigned to this registry</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {assignments.map((assignment) => (
+                                        <motion.div
+                                            key={assignment._id}
+                                            whileHover={{ y: -5 }}
+                                            className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                                        >
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="p-4 rounded-2xl bg-primary-500/10 text-primary-500">
+                                                    <Briefcase className="w-8 h-8" />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedAssignment(assignment);
+                                                            fetchSubmissions(assignment._id);
+                                                            setShowSubmissionsModal(true);
+                                                        }}
+                                                        className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white transition-colors"
+                                                        title="View Submissions"
+                                                    >
+                                                        <Users className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteAssignment(assignment._id)}
+                                                        className="p-2 rounded-lg bg-white/5 text-rose-500 hover:bg-rose-500/10 transition-colors"
+                                                        title="Delete Assignment"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-white font-black text-lg tracking-tight mb-2 truncate" title={assignment.title}>{assignment.title}</h4>
+                                                <p className="text-slate-500 text-xs font-bold leading-relaxed mb-4 line-clamp-2">{assignment.description || 'Deliverable evaluation module.'}</p>
+                                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="w-3 h-3 text-rose-400" />
+                                                        <span className="text-[10px] text-rose-400 font-black uppercase tracking-widest">
+                                                            Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    {assignment.fileUrl && (
+                                                        <a 
+                                                            href={`${api.defaults.baseURL.replace('/api', '')}${assignment.fileUrl}`} 
+                                                            target="_blank" 
+                                                            className="text-primary-400 hover:text-primary-300 transition-colors"
+                                                        >
+                                                            <Paperclip className="w-4 h-4" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -1600,6 +1784,228 @@ const TeacherClassDetails = () => {
                                     <span className="text-[11px] font-black uppercase tracking-widest">Finalize Deployment</span>
                                 </button>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Assignment Creation Modal */}
+            <AnimatePresence>
+                {showAssignmentModal && (
+                    <div className="fixed inset-0 flex items-center justify-center z-[130] p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowAssignmentModal(false)}
+                            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] border border-white/10 shadow-2xl relative z-10 p-8 md:p-10"
+                        >
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Initialize Task</h2>
+                                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest mt-1">Registry: {classData.name}</p>
+                                </div>
+                                <button onClick={() => setShowAssignmentModal(false)} className="p-2 rounded-xl hover:bg-white/5 text-slate-400 font-black">
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleCreateAssignment} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Task Designation</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g. Research Paper: AI Ethics"
+                                        value={assignmentTitle}
+                                        onChange={(e) => setAssignmentTitle(e.target.value)}
+                                        className="input-field bg-black/20"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contextual Brief</label>
+                                    <textarea
+                                        placeholder="Define objectives and constraints..."
+                                        value={assignmentDescription}
+                                        onChange={(e) => setAssignmentDescription(e.target.value)}
+                                        className="input-field bg-black/20 min-h-[100px] py-4 resize-none"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Termination Date</label>
+                                        <input
+                                            type="date"
+                                            required
+                                            value={assignmentDueDate}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            onChange={(e) => setAssignmentDueDate(e.target.value)}
+                                            className="input-field bg-black/20"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Reference Asset</label>
+                                        <input
+                                            type="file"
+                                            onChange={(e) => setAssignmentFile(e.target.files[0])}
+                                            className="hidden"
+                                            id="assignment-file-upload-2"
+                                        />
+                                        <label
+                                            htmlFor="assignment-file-upload-2"
+                                            className="flex items-center justify-center gap-2 p-3.5 rounded-2xl border-2 border-dashed border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary-500/50 transition-all cursor-pointer truncate"
+                                        >
+                                            {assignmentFile ? (
+                                                <span className="text-[10px] text-white font-black truncate">{assignmentFile.name}</span>
+                                            ) : (
+                                                <>
+                                                    <Upload className="w-4 h-4 text-slate-600" />
+                                                    <span className="text-[10px] text-slate-400 font-bold uppercase">Upload Asset</span>
+                                                </>
+                                            )}
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isCreatingAssignment}
+                                    className="btn-primary w-full py-5 rounded-3xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20"
+                                >
+                                    {isCreatingAssignment ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Deploy to Registry"}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Submissions Modal */}
+            <AnimatePresence>
+                {showSubmissionsModal && (
+                    <div className="fixed inset-0 flex items-center justify-center z-[130] p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowSubmissionsModal(false)}
+                            className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-[#0f172a] w-full max-w-4xl rounded-[2.5rem] border border-white/10 shadow-2xl relative z-10 flex flex-col max-h-[85vh] overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-white/5 flex justify-between items-center shrink-0">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Response Registry</h2>
+                                    <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest mt-1">Task: {selectedAssignment?.title}</p>
+                                </div>
+                                <button onClick={() => setShowSubmissionsModal(false)} className="p-2 rounded-xl hover:bg-white/5 text-slate-400">
+                                    <XCircle className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                                {isFetchingSubmissions ? (
+                                    <div className="p-20 flex justify-center"><Loader2 className="w-10 h-10 animate-spin text-primary-500" /></div>
+                                ) : submissions.length === 0 ? (
+                                    <div className="p-20 text-center opacity-40 font-black uppercase text-sm tracking-widest">No responses synchronized yet.</div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {submissions.map((sub) => (
+                                            <div key={sub._id} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/[0.04] transition-all group">
+                                                <div className="flex flex-col md:flex-row justify-between gap-6">
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="w-12 h-12 rounded-2xl bg-primary-500/10 text-primary-400 flex items-center justify-center font-black text-lg border border-primary-500/10">
+                                                            {sub.student?.name?.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-white font-black text-base">{sub.student?.name}</h4>
+                                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mt-1">
+                                                                {sub.student?.rollNo} • {new Date(sub.submittedAt).toLocaleString()}
+                                                            </p>
+                                                            <div className="mt-4 p-4 bg-black/40 rounded-2xl border border-white/5 text-slate-300 text-sm italic">
+                                                                {sub.responseText || "No text feedback provided."}
+                                                            </div>
+                                                            {sub.fileUrl && (
+                                                                <a 
+                                                                   href={`${api.defaults.baseURL.replace('/api', '')}${sub.fileUrl}`} 
+                                                                   target="_blank"
+                                                                   className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 text-primary-400 rounded-xl border border-primary-500/10 hover:bg-primary-500/20 transition-all text-[10px] font-black uppercase tracking-widest"
+                                                                >
+                                                                   <Paperclip className="w-4 h-4" />
+                                                                   Review Asset: {sub.fileName}
+                                                                </a>
+                                                            )}
+                                                            {sub.feedback && (
+                                                                <div className="mt-3 p-3 bg-emerald-500/5 rounded-xl border border-emerald-500/10 text-[10px] text-emerald-400/80 italic font-medium">
+                                                                    Faculty Feedback: {sub.feedback}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-3 shrink-0">
+                                                        {gradingSubmission?._id === sub._id ? (
+                                                            <form onSubmit={handleGradeSubmission} className="w-64 space-y-3 bg-black/40 p-4 rounded-2xl border border-primary-500/30">
+                                                                <input 
+                                                                   type="text" 
+                                                                   placeholder="Grade (e.g. A+)" 
+                                                                   value={grade}
+                                                                   onChange={(e) => setGrade(e.target.value)}
+                                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-black text-xs"
+                                                                />
+                                                                <textarea 
+                                                                   placeholder="Feedback..." 
+                                                                   value={feedback}
+                                                                   onChange={(e) => setFeedback(e.target.value)}
+                                                                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-xs h-20 resize-none"
+                                                                />
+                                                                <div className="flex gap-2">
+                                                                    <button type="submit" disabled={isSavingGrade} className="flex-1 py-2 bg-emerald-500 text-white rounded-lg text-[10px] font-black uppercase">
+                                                                        {isSavingGrade ? "..." : "Save"}
+                                                                    </button>
+                                                                    <button onClick={() => setGradingSubmission(null)} className="flex-1 py-2 bg-white/5 text-slate-400 rounded-lg text-[10px] font-black uppercase">Cancel</button>
+                                                                </div>
+                                                            </form>
+                                                        ) : (
+                                                            <>
+                                                                {sub.grade ? (
+                                                                    <div className="text-right">
+                                                                        <div className="text-2xl font-black text-emerald-400 tracking-tighter">{sub.grade}</div>
+                                                                        <p className="text-[8px] text-slate-500 font-bold uppercase tracking-[0.2em]">Verified Score</p>
+                                                                        <button onClick={() => {
+                                                                            setGradingSubmission(sub);
+                                                                            setGrade(sub.grade);
+                                                                            setFeedback(sub.feedback || '');
+                                                                        }} className="mt-2 text-[9px] text-primary-400 hover:text-primary-300 font-bold uppercase tracking-widest">Update Grade</button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <button 
+                                                                       onClick={() => setGradingSubmission(sub)}
+                                                                       className="px-6 py-3 bg-primary-500/10 text-primary-400 rounded-xl border border-primary-500/20 text-[10px] font-black uppercase tracking-widest hover:bg-primary-500/20"
+                                                                    >
+                                                                       Evaluate Response
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </motion.div>
                     </div>
                 )}
