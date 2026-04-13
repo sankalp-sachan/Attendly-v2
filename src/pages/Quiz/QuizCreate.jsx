@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Save, ArrowLeft, Clock, Shield, List, Type, CheckCircle, XCircle, FilePlus, Paperclip, Upload, LoaderCircle as Loader2 } from 'lucide-react';
+import { 
+    Plus, Trash2, Save, ArrowLeft, Clock, Shield, List, Type, CheckCircle, 
+    XCircle, FilePlus, Paperclip, Upload, LoaderCircle as Loader2, Image, ShieldCheck 
+} from 'lucide-react';
 import api from '../../utils/api';
 
 const QuizCreate = () => {
@@ -21,6 +24,11 @@ const QuizCreate = () => {
     const [questionFile, setQuestionFile] = useState(null);
     const [isScanning, setIsScanning] = useState(false);
 
+    // AI Generation States
+    const [syllabusAIText, setSyllabusAIText] = useState('');
+    const [syllabusAIImage, setSyllabusAIImage] = useState(null);
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
     const handleAddQuestion = () => {
         setQuestions([...questions, { questionText: '', options: ['A', 'B', 'C', 'D'], correctOption: 0 }]);
     };
@@ -28,6 +36,39 @@ const QuizCreate = () => {
     const handleRemoveQuestion = (index) => {
         if (questions.length === 1) return;
         setQuestions(questions.filter((_, i) => i !== index));
+    };
+
+    const handleGenerateAI = async () => {
+        if (!syllabusAIText && !syllabusAIImage) {
+            return alert("Please provide syllabus text or an image for AI generation.");
+        }
+
+        setIsGeneratingAI(true);
+        try {
+            const formData = new FormData();
+            if (syllabusAIImage) {
+                formData.append('syllabusImage', syllabusAIImage);
+            }
+            if (syllabusAIText) {
+                formData.append('syllabusText', syllabusAIText);
+            }
+
+            const { data } = await api.post('/quizzes/generate-ai', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            if (data && data.length > 0) {
+                setQuestions(data);
+                alert(`AI successfully forged ${data.length} evaluation modules!`);
+            } else {
+                alert("AI could not generate questions from the provided input.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.message || "AI Generation failed.");
+        } finally {
+            setIsGeneratingAI(false);
+        }
     };
 
     const handleScan = async () => {
@@ -128,6 +169,68 @@ const QuizCreate = () => {
                 </header>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* AI Generation Card */}
+                    <div className="card p-8 bg-violet-900/10 border border-violet-500/20 shadow-[0_0_30px_rgba(139,92,246,0.1)] space-y-6 relative overflow-hidden group">
+                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-600/10 rounded-full blur-3xl group-hover:bg-violet-600/20 transition-all"></div>
+                        <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3 text-violet-400">
+                            <Shield className="w-6 h-6 animate-pulse" />
+                            AI Genius Forge
+                        </h2>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-violet-400/60">Syllabus / Concept Text</label>
+                                <textarea
+                                    placeholder="Paste syllabus modules or core concepts here..."
+                                    value={syllabusAIText}
+                                    onChange={(e) => setSyllabusAIText(e.target.value)}
+                                    className="input-field bg-black/40 border-violet-500/20 focus:border-violet-500/50 min-h-[120px] py-4 text-sm"
+                                />
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-violet-400/60">Upload Syllabus Image (OCR)</label>
+                                <div className="relative h-[120px]">
+                                    <input
+                                        type="file"
+                                        onChange={(e) => setSyllabusAIImage(e.target.files[0])}
+                                        className="hidden"
+                                        id="syllabus-image-upload"
+                                        accept="image/*"
+                                    />
+                                    <label
+                                        htmlFor="syllabus-image-upload"
+                                        className="flex flex-col items-center justify-center h-full bg-black/40 border-2 border-dashed border-violet-500/20 rounded-2xl cursor-pointer hover:border-violet-500/50 transition-all"
+                                    >
+                                        <Image className="w-6 h-6 text-violet-400 mb-2" />
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-violet-300">
+                                            {syllabusAIImage ? syllabusAIImage.name : 'Stitch Image Asset'}
+                                        </p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleGenerateAI}
+                            disabled={isGeneratingAI}
+                            className="w-full py-4 bg-violet-600/20 border border-violet-500/30 rounded-[1.5rem] text-violet-400 font-black text-xs uppercase tracking-[0.25em] hover:bg-violet-600 hover:text-white transition-all flex items-center justify-center gap-3 group/ai shadow-lg shadow-violet-900/20"
+                        >
+                            {isGeneratingAI ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>AI Neural Processing...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ShieldCheck className="w-5 h-5 group-hover/ai:scale-110 transition-transform" />
+                                    <span>Generate Evaluation Matrix</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+
                     {/* Basic Info */}
                     <div className="card p-8 bg-slate-900/40 border-white/5 space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
