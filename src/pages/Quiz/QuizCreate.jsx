@@ -27,6 +27,8 @@ const QuizCreate = () => {
     // AI Generation States
     const [syllabusAIText, setSyllabusAIText] = useState('');
     const [syllabusAIImage, setSyllabusAIImage] = useState(null);
+    const [aiQuestionCount, setAiQuestionCount] = useState(5);
+    const [aiDifficulty, setAiDifficulty] = useState('Medium');
     const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
     const handleAddQuestion = () => {
@@ -52,6 +54,8 @@ const QuizCreate = () => {
             if (syllabusAIText) {
                 formData.append('syllabusText', syllabusAIText);
             }
+            formData.append('questionCount', aiQuestionCount);
+            formData.append('difficulty', aiDifficulty);
 
             const { data } = await api.post('/quizzes/generate-ai', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
@@ -207,6 +211,40 @@ const QuizCreate = () => {
                                             {syllabusAIImage ? syllabusAIImage.name : 'Stitch Image Asset'}
                                         </p>
                                     </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* AI Parameters */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-black/40 p-6 rounded-2xl border border-violet-500/10">
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-violet-400/60">Module Count</label>
+                                <div className="flex gap-2">
+                                    {[5, 10, 15].map(num => (
+                                        <button
+                                            key={num}
+                                            type="button"
+                                            onClick={() => setAiQuestionCount(num)}
+                                            className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${aiQuestionCount === num ? 'bg-violet-600 text-white shadow-lg' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}
+                                        >
+                                            {num} MCQs
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-violet-400/60">Logic Depth (Difficulty)</label>
+                                <div className="flex gap-2">
+                                    {['Easy', 'Medium', 'Hard'].map(level => (
+                                        <button
+                                            key={level}
+                                            type="button"
+                                            onClick={() => setAiDifficulty(level)}
+                                            className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${aiDifficulty === level ? 'bg-violet-600 text-white shadow-lg' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}
+                                        >
+                                            {level}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         </div>
