@@ -405,16 +405,17 @@ const TeacherClassDetails = () => {
         }
     };
 
-    const handleSummarizeSyllabus = async () => {
+    const handleSummarizeSyllabus = async (mode = 'summary') => {
         if (!syllabusText.trim()) return;
         try {
             setLoadingSyllabus(true);
             const { data } = await api.post(`/college/teacher/classes/${classId}/syllabus-summary`, {
-                syllabusText
+                syllabusText,
+                mode
             });
             setSyllabusSummary(data.summary);
         } catch (error) {
-            setSyllabusSummary("Failed to generate summary. Please check your text or try again later.");
+            setSyllabusSummary(`Failed to generate ${mode}. Please check your text or try again later.`);
         } finally {
             setLoadingSyllabus(false);
         }
@@ -689,17 +690,32 @@ const TeacherClassDetails = () => {
                                             value={syllabusText}
                                             onChange={(e) => setSyllabusText(e.target.value)}
                                         ></textarea>
-                                        <button
-                                            onClick={handleSummarizeSyllabus}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <button 
+                                            onClick={() => handleSummarizeSyllabus('summary')}
                                             disabled={loadingSyllabus || !syllabusText.trim()}
-                                            className="btn-primary w-full py-4 text-[10px] md:text-xs tracking-widest font-black uppercase disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-primary-500/20 flex items-center justify-center gap-2"
+                                            className="btn-primary py-3 rounded-xl text-[10px] uppercase font-black tracking-widest flex items-center justify-center gap-2 group disabled:opacity-50"
                                         >
-                                            {loadingSyllabus ? (
-                                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            ) : (
-                                                <>✨ Summarize Concept Pattern</>
-                                            )}
+                                            {loadingSyllabus ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <ShieldCheck className="w-4 h-4 group-hover:scale-110 transition-transform" />}
+                                            <span>Summarize</span>
                                         </button>
+                                        <button 
+                                            onClick={() => handleSummarizeSyllabus('notes')}
+                                            disabled={loadingSyllabus || !syllabusText.trim()}
+                                            className="px-6 py-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl text-[10px] uppercase font-black tracking-widest flex items-center justify-center gap-2 group hover:bg-indigo-500/20 transition-all disabled:opacity-30"
+                                        >
+                                            <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                            <span>Generate Notes</span>
+                                        </button>
+                                        <button 
+                                            onClick={() => handleSummarizeSyllabus('ppt')}
+                                            disabled={loadingSyllabus || !syllabusText.trim()}
+                                            className="px-6 py-3 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-xl text-[10px] uppercase font-black tracking-widest flex items-center justify-center gap-2 group hover:bg-amber-500/20 transition-all disabled:opacity-30"
+                                        >
+                                            <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                            <span>PPT Structure</span>
+                                        </button>
+                                    </div>
                                     </div>
 
                                     {syllabusSummary && (
