@@ -135,18 +135,27 @@ const StudentClassDetails = () => {
                 x: 1, y: 4.5, w: 8, h: 0.5, fontSize: 12, align: "center", color: "64748B" 
             });
 
-            const sections = syllabusSummary.split(/\n(?=SLIDE|Slide|Topic|TOPIC|Unit|UNIT)/i);
+            const sections = syllabusSummary.split(/\n(?=(?:\*\*?|#)?\s*(?:SLIDE|Slide|Topic|TOPIC|Unit|UNIT|Module|MODULE)\s*\d*:?)/i);
             
             sections.forEach(section => {
                 if (!section.trim()) return;
+                
+                const lines = section.trim().split('\n');
+                if (lines.length === 0) return;
+
                 const slide = pptx.addSlide();
                 slide.background = { fill: "FFFFFF" };
                 
-                const lines = section.trim().split('\n');
-                const title = lines[0].replace(/^(SLIDE\s+\d+:|Slide\s+\d+:|Topic:|Unit:)\s*/i, '').trim();
-                const contentLines = lines.slice(1).map(l => l.trim().replace(/^[-*•]\s+/, '')).filter(l => l);
+                const title = lines[0]
+                    .replace(/^[\s*#]*(SLIDE\s+\d+:?|Slide\s+\d+:?|Topic:?|Unit:?|Module:?)\s*/i, '')
+                    .replace(/[*#\s]*$/, '')
+                    .trim();
 
-                slide.addText(title.toUpperCase(), { 
+                const contentLines = lines.slice(1)
+                    .map(l => l.trim().replace(/^[\s*•-]+\s*/, ''))
+                    .filter(l => l && !l.toLowerCase().includes('slide'));
+
+                slide.addText(title || "Content Module", { 
                     x: 0.5, y: 0.5, w: 9, h: 1, fontSize: 24, bold: true, color: "3B82F6", border: { pt: 2, color: "EFF6FF" } 
                 });
 
