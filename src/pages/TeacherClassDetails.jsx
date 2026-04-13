@@ -6,7 +6,7 @@ import {
     ChevronDown, UserCheck, Shield, BookOpen, AlertCircle, Save,
     ArrowLeft, MoreVertical, Download, FileText, Share2, MoreHorizontal,
     Printer, Loader2, Trophy, Clock, Trash2, Edit2, History, TrendingUp, XCircle, CheckCircle,
-    BarChart2, Star, ShieldCheck, Plus, Upload, FileIcon, Image, Paperclip, HelpCircle, Award
+    BarChart2, Star, ShieldCheck, Plus, Upload, FileIcon, Image, Paperclip, HelpCircle, Award, Briefcase
 } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,

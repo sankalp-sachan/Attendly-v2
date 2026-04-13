@@ -30,9 +30,10 @@ export const AttendanceProvider = ({ children }) => {
         const fetchClasses = async () => {
             if (user) {
                 try {
-                    const { data } = await api.get('/attendance');
+                    const endpoint = (user.role === 'teacher') ? '/college/teacher/classes' : '/college/student/classes';
+                    const { data } = await api.get(endpoint);
                     // Normalize _id to id for frontend compatibility
-                    const formattedClasses = data.map(c => ({
+                    const formattedClasses = (data.classes || data).map(c => ({
                         ...c,
                         id: c._id || c.id
                     }));
