@@ -68,6 +68,11 @@ const TeacherClassDetails = () => {
     const [selectedQuiz, setSelectedQuiz] = useState(null);
     const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
 
+    // Date filtering states
+    const [historyFilterDate, setHistoryFilterDate] = useState('');
+    const [reportFilterDate, setReportFilterDate] = useState(new Date().toISOString().split('T')[0]);
+    const [isDownloadingDaily, setIsDownloadingDaily] = useState(false);
+
     useEffect(() => {
         fetchClassDetails();
     }, [classId]);
@@ -191,7 +196,28 @@ const TeacherClassDetails = () => {
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
-        XLSX.writeFile(workbook, `${classData.name} _Attendance.xlsx`);
+        XLSX.writeFile(workbook, `Report_${classData.name}_${new Date().toLocaleDateString()}.xlsx`);
+    };
+
+    const handleExportDailyExcel = async (date) => {
+        if (!date) return;
+        setIsDownloadingDaily(true);
+        try {
+            const response = await api.get(`/college/teacher/attendance/export-daily/${classId}/${date}`, {
+                responseType: 'blob'
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Attendance_${classData.name}_${date}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            alert(error.response?.data?.message || "Export failed. Please ensure records exist for this date.");
+        } finally {
+            setIsDownloadingDaily(false);
+        }
     };
 
     const exportToPDF = () => {
@@ -861,7 +887,7 @@ const TeacherClassDetails = () => {
                     )}
 
                     {activeTab === 'reports' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 sm:px-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-0">
                             <motion.div
                                 whileHover={{ y: -8 }}
                                 className="card bg-slate-900/40 border-white/5 shadow-2xl p-10 flex flex-col items-center text-center group"
@@ -875,6 +901,34 @@ const TeacherClassDetails = () => {
                                     <Download className="w-5 h-5 group-hover/btn:translate-y-1 transition-transform" />
                                     <span className="text-[10px] uppercase font-black tracking-widest">Download .XLSX</span>
                                 </button>
+                            </motion.div>
+
+                            <motion.div
+                                whileHover={{ y: -8 }}
+                                className="card bg-slate-900/40 border-white/5 shadow-2xl p-10 flex flex-col items-center text-center group"
+                            >
+                                <div className="w-20 h-20 bg-primary-500/10 text-primary-500 rounded-[2rem] flex items-center justify-center mb-8 border border-primary-500/10 group-hover:scale-110 transition-transform">
+                                    <Calendar className="w-10 h-10" />
+                                </div>
+                                <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Specific Date Registry</h3>
+                                <p className="text-slate-500 mb-6 font-bold text-sm leading-relaxed max-w-xs">Extract students data for a specific chronological checkpoint in Excel format.</p>
+                                <div className="w-full space-y-4">
+                                    <input 
+                                        type="date"
+                                        value={reportFilterDate}
+                                        max={new Date().toISOString().split('T')[0]}
+                                        onChange={(e) => setReportFilterDate(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-black text-xs outline-none focus:border-primary-500/50 transition-all cursor-pointer"
+                                    />
+                                    <button 
+                                        onClick={() => handleExportDailyExcel(reportFilterDate)}
+                                        disabled={isDownloadingDaily || !reportFilterDate}
+                                        className="w-full btn-primary py-4 rounded-2xl flex items-center justify-center gap-3 group/btn disabled:opacity-50"
+                                    >
+                                        {isDownloadingDaily ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5 group-hover/btn:translate-y-1 transition-transform" />}
+                                        <span className="text-[10px] uppercase font-black tracking-widest">Export Checkpoint</span>
+                                    </button>
+                                </div>
                             </motion.div>
 
                             <motion.div
@@ -896,15 +950,39 @@ const TeacherClassDetails = () => {
 
                     {activeTab === 'history' && (
                         <div className="space-y-6">
-                            {history.length === 0 ? (
-                                <div className="p-20 text-center">
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/40 p-6 rounded-3xl border border-white/5 shadow-2xl">
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase flex items-center gap-3 w-full sm:w-auto">
+                                    <History className="w-6 h-6 text-emerald-400" />
+                                    Chronological Audit Log
+                                </h3>
+                                <div className="relative w-full sm:w-64 group">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-hover:text-primary-400 transition-colors" />
+                                    <input 
+                                        type="date"
+                                        value={historyFilterDate}
+                                        onChange={(e) => setHistoryFilterDate(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-white font-black text-xs outline-none focus:border-primary-500/50 transition-all cursor-pointer"
+                                    />
+                                    {historyFilterDate && (
+                                        <button 
+                                            onClick={() => setHistoryFilterDate('')}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                                        >
+                                            <XCircle className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {history.filter(record => !historyFilterDate || record.date.includes(historyFilterDate)).length === 0 ? (
+                                <div className="p-20 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5 border-dashed">
                                     <Clock className="w-16 h-16 text-slate-800 mx-auto mb-4 opacity-40" />
-                                    <p className="text-slate-600 font-black uppercase tracking-[0.25em] text-sm">Chronological void - No records</p>
+                                    <p className="text-slate-600 font-black uppercase tracking-[0.25em] text-sm">Chronological void - No matching records found</p>
                                 </div>
                             ) : (
                                 <div className="bg-slate-900/40 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
                                     <div className="divide-y divide-white/5">
-                                        {history.map(record => (
+                                        {history.filter(record => !historyFilterDate || record.date.includes(historyFilterDate)).map(record => (
                                             <motion.div
                                                 key={record._id}
                                                 whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
@@ -1268,12 +1346,23 @@ const TeacherClassDetails = () => {
                                         {new Date(selectedLog.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                     </p>
                                 </div>
-                                <button
-                                    onClick={() => setShowLogModal(false)}
-                                    className="p-3 rounded-xl hover:bg-white/5 text-slate-400"
-                                >
-                                    <XCircle className="w-6 h-6" />
-                                </button>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => handleExportDailyExcel(selectedLog.date)}
+                                        disabled={isDownloadingDaily}
+                                        className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-all border border-emerald-500/10 flex items-center gap-2 group"
+                                        title="Download Excel for this date"
+                                    >
+                                        {isDownloadingDaily ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />}
+                                        <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Export XLSX</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setShowLogModal(false)}
+                                        className="p-3 rounded-xl hover:bg-white/5 text-slate-400 group"
+                                    >
+                                        <XCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-6 space-y-3 scrollbar-none">
