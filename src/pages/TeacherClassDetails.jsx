@@ -59,6 +59,9 @@ const TeacherClassDetails = () => {
     const [statsModalData, setStatsModalData] = useState({ title: '', type: '', students: [] });
     const [showLogModal, setShowLogModal] = useState(false);
     const [selectedLog, setSelectedLog] = useState(null);
+    const [weeklyReport, setWeeklyReport] = useState(null);
+    const [isFetchingWeeklyReport, setIsFetchingWeeklyReport] = useState(false);
+    const [isTabMenuOpen, setIsTabMenuOpen] = useState(false);
 
     useEffect(() => {
         fetchClassDetails();
@@ -105,6 +108,24 @@ const TeacherClassDetails = () => {
             setIsFetchingQuizzes(false);
         }
     };
+
+    const fetchWeeklyReport = async () => {
+        setIsFetchingWeeklyReport(true);
+        try {
+            const { data } = await api.get(`/college/teacher/weekly-report/${classId}`);
+            setWeeklyReport(data);
+        } catch (error) {
+            console.error("Failed to fetch weekly report");
+        } finally {
+            setIsFetchingWeeklyReport(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'weekly') {
+            fetchWeeklyReport();
+        }
+    }, [activeTab]);
 
     const handleNoteUpload = async (e) => {
         e.preventDefault();
@@ -308,20 +329,84 @@ const TeacherClassDetails = () => {
                     )}
                 </header>
 
-                {/* Tabs */}
-                <div className="flex gap-4 p-1.5 bg-slate-900/50 backdrop-blur-xl rounded-[2rem] mb-12 border border-white/5 w-fit mx-auto overflow-x-auto scrollbar-none shadow-2xl">
-                    {['overview', 'feed', 'students', 'history', 'analytics', 'reports', 'notes', 'quizzes'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === tab
-                                ? 'bg-primary-500 text-white shadow-[0_0_25px_rgba(59,130,246,0.3)]'
-                                : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
-                                }`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
+                {/* Responsive Tab Navigation (Hamburger Style) */}
+                <div className="relative mb-12 flex justify-center">
+                    <button
+                        onClick={() => setIsTabMenuOpen(!isTabMenuOpen)}
+                        className="flex items-center gap-4 px-8 py-4 bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl hover:bg-slate-800 transition-all group"
+                    >
+                        <div className="flex flex-col gap-1">
+                            <motion.div 
+                                animate={isTabMenuOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+                                className="w-6 h-0.5 bg-primary-400 rounded-full" 
+                            />
+                            <motion.div 
+                                animate={isTabMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                                className="w-6 h-0.5 bg-primary-400 rounded-full" 
+                            />
+                            <motion.div 
+                                animate={isTabMenuOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+                                className="w-6 h-0.5 bg-primary-400 rounded-full" 
+                            />
+                        </div>
+                        <div className="text-left">
+                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] leading-none mb-1">Navigation Menu</p>
+                            <h3 className="text-sm font-black text-white uppercase tracking-widest leading-none">
+                                {activeTab === 'weekly' ? 'Weekly Report' : activeTab}
+                            </h3>
+                        </div>
+                        <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform duration-500 ${isTabMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                        {isTabMenuOpen && (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsTabMenuOpen(false)}
+                                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md lg:hidden"
+                                />
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                                    className="absolute top-full mt-4 z-50 w-full max-w-2xl bg-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden"
+                                >
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {['overview', 'weekly', 'feed', 'students', 'history', 'analytics', 'reports', 'notes', 'quizzes'].map((tab) => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => {
+                                                    setActiveTab(tab);
+                                                    setIsTabMenuOpen(false);
+                                                }}
+                                                className={`flex flex-col items-center justify-center gap-3 p-6 rounded-3xl transition-all ${activeTab === tab
+                                                    ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/20'
+                                                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                                                    }`}
+                                            >
+                                                {tab === 'overview' && <BarChart2 className="w-6 h-6" />}
+                                                {tab === 'weekly' && <Calendar className="w-6 h-6" />}
+                                                {tab === 'feed' && <Share2 className="w-6 h-6" />}
+                                                {tab === 'students' && <Users className="w-6 h-6" />}
+                                                {tab === 'history' && <History className="w-6 h-6" />}
+                                                {tab === 'analytics' && <TrendingUp className="w-6 h-6" />}
+                                                {tab === 'reports' && <Download className="w-6 h-6" />}
+                                                {tab === 'notes' && <FileText className="w-6 h-6" />}
+                                                {tab === 'quizzes' && <HelpCircle className="w-6 h-6" />}
+                                                
+                                                <span className="text-[10px] font-black uppercase tracking-widest">
+                                                    {tab === 'weekly' ? 'Weekly' : tab}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Tab Content */}
@@ -651,6 +736,109 @@ const TeacherClassDetails = () => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'weekly' && (
+                        <div className="space-y-8">
+                            {isFetchingWeeklyReport ? (
+                                <div className="p-20 text-center">
+                                    <Loader2 className="w-12 h-12 text-primary-500 animate-spin mx-auto mb-4" />
+                                    <p className="text-slate-500 font-black uppercase tracking-widest text-sm">Aggregating Weekly Intelligence...</p>
+                                </div>
+                            ) : !weeklyReport ? (
+                                <div className="p-20 text-center">
+                                    <AlertCircle className="w-16 h-16 text-slate-800 mx-auto mb-4" />
+                                    <p className="text-slate-600 font-black uppercase tracking-widest text-sm">No weekly data available</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="card p-8 bg-slate-900/40 border-white/5 shadow-2xl">
+                                            <Calendar className="w-10 h-10 text-primary-400 mb-6" />
+                                            <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2">Week Starting</h3>
+                                            <p className="text-2xl font-black text-white">{new Date(weeklyReport.weekStarting).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                        </div>
+                                        <div className="card p-8 bg-slate-900/40 border-white/5 shadow-2xl">
+                                            <History className="w-10 h-10 text-emerald-400 mb-6" />
+                                            <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2">Sessions This Week</h3>
+                                            <p className="text-4xl font-black text-white">{weeklyReport.totalSessions}</p>
+                                        </div>
+                                        <div className="card p-8 bg-slate-900/40 border-white/5 shadow-2xl">
+                                            <Users className="w-10 h-10 text-rose-400 mb-6" />
+                                            <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-2">Most Absent</h3>
+                                            <p className="text-4xl font-black text-white">{weeklyReport.mostAbsent.length}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        {/* Most Absent List */}
+                                        <div className="card p-8 bg-slate-900/40 border-white/5 shadow-2xl">
+                                            <h3 className="text-xl font-black text-white tracking-tighter mb-8 flex items-center gap-3">
+                                                <XCircle className="w-6 h-6 text-rose-500" />
+                                                High Absence Registry (This Week)
+                                            </h3>
+                                            <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                                                {weeklyReport.mostAbsent.map((student, idx) => (
+                                                    <div key={student.studentId} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-rose-500/30 transition-all group">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center font-black text-xs">
+                                                                {idx + 1}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-white font-black text-sm">{student.name}</p>
+                                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{student.rollNo}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-rose-400 font-black text-lg">{student.absent}</p>
+                                                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Missed</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {weeklyReport.mostAbsent.length === 0 && (
+                                                    <p className="text-center text-slate-500 font-black uppercase tracking-widest py-10">All students present this week!</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Weekly Performance Overview */}
+                                        <div className="card p-8 bg-slate-900/40 border-white/5 shadow-2xl">
+                                            <h3 className="text-xl font-black text-white tracking-tighter mb-8 flex items-center gap-3">
+                                                <TrendingUp className="w-6 h-6 text-emerald-400" />
+                                                Weekly Enrollment Performance
+                                            </h3>
+                                            <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                                                {weeklyReport.weeklyStats
+                                                    .sort((a,b) => b.percentage - a.percentage)
+                                                    .map(student => (
+                                                    <div key={student.studentId} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all">
+                                                        <div>
+                                                            <p className="text-white font-black text-sm">{student.name}</p>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <div className="w-20 h-1 bg-white/5 rounded-full overflow-hidden">
+                                                                    <div className={`h-full ${student.percentage < 75 ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${student.percentage}%` }}></div>
+                                                                </div>
+                                                                <span className="text-[9px] font-black text-slate-400 font-mono">{student.percentage}%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-4 items-center">
+                                                            <div className="text-center">
+                                                                <p className="text-emerald-400 font-black text-sm">{student.present}</p>
+                                                                <p className="text-[8px] text-slate-500 font-bold uppercase">Pres</p>
+                                                            </div>
+                                                            <div className="text-center">
+                                                                <p className="text-rose-400 font-black text-sm">{student.absent}</p>
+                                                                <p className="text-[8px] text-slate-500 font-bold uppercase">Abs</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
