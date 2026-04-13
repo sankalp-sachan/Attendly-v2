@@ -65,7 +65,13 @@ const QuizTake = () => {
         try {
             const answersArray = quiz.questions.map((_, i) => answers[i] !== undefined ? answers[i] : -1);
             await api.post(`/quizzes/${id}/submit`, { answers: answersArray });
-            navigate(`/student/classes/${classId}/quiz/${id}/result`);
+            
+            if (quiz.showResult) {
+                navigate(`/student/classes/${classId}/quiz/${id}/result`);
+            } else {
+                alert("Quiz submitted successfully! Results will be released by the teacher later.");
+                navigate(`/student/classes/${classId}`);
+            }
         } catch (error) {
             alert("Submission failed. Please contact your teacher.");
         } finally {
@@ -208,11 +214,13 @@ const QuizTake = () => {
                     <div className="flex justify-between items-center shrink-0">
                         <button
                             onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
-                            disabled={currentQuestion === 0}
+                            disabled={currentQuestion === 0 || !quiz.backtrackingEnabled}
                             className="p-5 rounded-2xl bg-white/5 border border-white/10 text-slate-400 hover:text-white disabled:opacity-20 transition-all flex items-center gap-3"
                         >
                             <ChevronLeft className="w-6 h-6" />
-                            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">Previous Module</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">
+                                {quiz.backtrackingEnabled ? 'Previous Module' : 'Backtracking Locked'}
+                            </span>
                         </button>
 
                         <div className="flex gap-2">

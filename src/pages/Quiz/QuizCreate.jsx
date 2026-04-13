@@ -13,6 +13,8 @@ const QuizCreate = () => {
     const [description, setDescription] = useState('');
     const [password, setPassword] = useState('');
     const [duration, setDuration] = useState(30);
+    const [backtrackingEnabled, setBacktrackingEnabled] = useState(true);
+    const [showResult, setShowResult] = useState(true);
     const [questions, setQuestions] = useState([
         { questionText: '', options: ['A', 'B', 'C', 'D'], correctOption: 0 }
     ]);
@@ -90,6 +92,8 @@ const QuizCreate = () => {
             formData.append('description', description);
             formData.append('password', password);
             formData.append('duration', duration);
+            formData.append('backtrackingEnabled', backtrackingEnabled);
+            formData.append('showResult', showResult);
             formData.append('questions', JSON.stringify(finalQuestions));
             if (questionFile) {
                 formData.append('questionFile', questionFile);
@@ -169,6 +173,38 @@ const QuizCreate = () => {
                                     />
                                 </div>
                             </div>
+
+                            {/* New Settings Toggles */}
+                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/20 p-6 rounded-[2rem] border border-white/10">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-black uppercase tracking-tight">Allow Backtracking</p>
+                                        <p className="text-[9px] text-slate-500 font-bold uppercase">Students can revisit previous modules</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setBacktrackingEnabled(!backtrackingEnabled)}
+                                        className={`w-14 h-8 rounded-full relative transition-all duration-300 ${backtrackingEnabled ? 'bg-primary-600 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'bg-slate-800'}`}
+                                    >
+                                        <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${backtrackingEnabled ? 'left-7' : 'left-1'}`} />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-black uppercase tracking-tight">Instant Result Insight</p>
+                                        <p className="text-[9px] text-slate-500 font-bold uppercase">Show score immediately after termination</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowResult(!showResult)}
+                                        className={`w-14 h-8 rounded-full relative transition-all duration-300 ${showResult ? 'bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-slate-800'}`}
+                                    >
+                                        <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${showResult ? 'left-7' : 'left-1'}`} />
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="space-y-2 md:col-span-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Description (Optional)</label>
                                 <textarea

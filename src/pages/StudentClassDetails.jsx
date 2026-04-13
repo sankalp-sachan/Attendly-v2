@@ -357,12 +357,19 @@ const StudentClassDetails = () => {
                                     <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500">
                                         <HelpCircle className="w-6 h-6" />
                                     </div>
-                                    <button
-                                        onClick={() => navigate(`/student/classes/${classId}/quiz/${quiz._id}/take`)}
-                                        className="px-6 py-3 rounded-xl bg-primary-600 text-white hover:bg-primary-500 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary-500/20"
-                                    >
-                                        Attempt Quiz
-                                    </button>
+                                    {quiz.myResult ? (
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest">Completed</span>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-1">{quiz.myResult.score}/{quiz.myResult.totalQuestions} Marks</span>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => navigate(`/student/classes/${classId}/quiz/${quiz._id}/take`)}
+                                            className="px-6 py-3 rounded-xl bg-primary-600 text-white hover:bg-primary-500 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary-500/20"
+                                        >
+                                            Attempt Quiz
+                                        </button>
+                                    )}
                                 </div>
                                 <div>
                                     <h4 className="text-white font-black text-lg tracking-tight mb-2 truncate" title={quiz.title}>{quiz.title}</h4>
@@ -372,12 +379,14 @@ const StudentClassDetails = () => {
                                             <Clock className="w-3 h-3 text-slate-500" />
                                             <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest">{quiz.duration} MIN</span>
                                         </div>
-                                        <button 
-                                            onClick={() => navigate(`/student/classes/${classId}/quiz/${quiz._id}/result`)}
-                                            className="text-[8px] text-primary-400 font-black uppercase tracking-widest hover:text-white transition-colors"
-                                        >
-                                            View Score
-                                        </button>
+                                        {quiz.myResult && quiz.showResult && (
+                                            <button 
+                                                onClick={() => navigate(`/student/classes/${classId}/quiz/${quiz._id}/result`)}
+                                                className="text-[8px] text-primary-400 font-black uppercase tracking-widest hover:text-white transition-colors"
+                                            >
+                                                Analysis Report
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>

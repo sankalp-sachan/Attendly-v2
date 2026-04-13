@@ -11,8 +11,13 @@ const AIAssistant = () => {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [position, setPosition] = useState(() => localStorage.getItem('ai-assistant-pos') || 'bottom-right');
     const chatEndRef = useRef(null);
     const { user } = useAuth();
+
+    useEffect(() => {
+        localStorage.setItem('ai-assistant-pos', position);
+    }, [position]);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -46,22 +51,24 @@ const AIAssistant = () => {
         <>
             {/* Floating Toggle Button */}
             <motion.button
+                layout
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsOpen(true)}
-                className={`fixed bottom-6 right-6 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] z-[99999] flex items-center justify-center border border-white/20 transition-all ${isOpen ? 'opacity-0 scale-0 pointer-events-none' : 'opacity-100 scale-100'}`}
+                className={`fixed ${position === 'bottom-right' ? 'bottom-6 right-6' : 'bottom-6 left-6'} w-14 h-14 rounded-full bg-indigo-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] z-[99999] flex items-center justify-center border border-white/20 transition-all ${isOpen ? 'opacity-0 scale-0 pointer-events-none' : 'opacity-100 scale-100'}`}
             >
                 <Sparkles className="w-6 h-6 animate-pulse" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#020617]" />
+                <div className={`absolute -top-1 ${position === 'bottom-right' ? '-right-1' : '-left-1'} w-4 h-4 bg-emerald-400 rounded-full border-2 border-[#020617]`} />
             </motion.button>
 
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
+                        layout
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-6 right-6 w-[350px] md:w-[400px] h-[550px] bg-[#0f172a] border border-white/10 rounded-[2rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] z-[10000] flex flex-col overflow-hidden"
+                        className={`fixed ${position === 'bottom-right' ? 'bottom-6 right-6' : 'bottom-6 left-6'} w-[350px] md:w-[400px] h-[550px] bg-[#0f172a] border border-white/10 rounded-[2rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] z-[10000] flex flex-col overflow-hidden`}
                     >
                         {/* Header */}
                         <div className="p-6 bg-gradient-to-r from-primary-600 to-indigo-600 flex items-center justify-between">
@@ -77,13 +84,25 @@ const AIAssistant = () => {
                                     </div>
                                 </div>
                             </div>
-                            <button 
-                                onClick={() => setIsOpen(false)}
-                                className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white/70 hover:text-white"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setPosition(prev => prev === 'bottom-right' ? 'bottom-left' : 'bottom-right')}
+                                        className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white/70 hover:text-white flex items-center gap-2 mr-2"
+                                        title="Change Position"
+                                    >
+                                        <div className="flex gap-1">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${position === 'bottom-left' ? 'bg-white' : 'bg-white/20'}`} />
+                                            <div className={`w-1.5 h-1.5 rounded-full ${position === 'bottom-right' ? 'bg-white' : 'bg-white/20'}`} />
+                                        </div>
+                                    </button>
+                                    <button 
+                                        onClick={() => setIsOpen(false)}
+                                        className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white/70 hover:text-white"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
 
                         {/* Messages Area */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-950/50">
