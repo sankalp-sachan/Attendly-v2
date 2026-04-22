@@ -1104,8 +1104,8 @@ const TeacherClassDetails = () => {
                                                 Weekly Enrollment Performance
                                             </h3>
                                             <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                                                {weeklyReport.weeklyStats
-                                                    .sort((a,b) => b.percentage - a.percentage)
+                                                {[...weeklyReport.weeklyStats]
+                                                     .sort((a,b) => b.percentage - a.percentage)
                                                     .map(student => (
                                                     <div key={student.studentId} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all">
                                                         <div>
