@@ -119,9 +119,17 @@ const UniversityAnalyticsReport = () => {
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Attendance Average', val: `${(currentData?.reduce((acc, curr) => acc + parseFloat(curr.percentage), 0) / (currentData?.length || 1)).toFixed(1)}%`, icon: TrendingUp, color: 'text-emerald-400' },
-                    { label: 'Active Sectors', val: currentData?.length || 0, icon: Database, color: 'text-indigo-400' },
-                    { label: 'Total Records', val: currentData?.reduce((acc, curr) => acc + (curr.total || curr.totalRecords || 0), 0), icon: Shield, color: 'text-primary-400' }
+                    { 
+                        label: 'Global Average', 
+                        val: `${(
+                            (currentData?.reduce((acc, curr) => acc + (curr.present || curr.presentRecords || 0), 0) / 
+                             currentData?.reduce((acc, curr) => acc + (curr.total || curr.totalRecords || 1), 0)) * 100
+                        ).toFixed(1)}%`, 
+                        icon: TrendingUp, 
+                        color: 'text-emerald-400' 
+                    },
+                    { label: 'Academic Sectors', val: currentData?.length || 0, icon: Database, color: 'text-indigo-400' },
+                    { label: 'Total Registry', val: currentData?.reduce((acc, curr) => acc + (curr.total || curr.totalRecords || 0), 0), icon: Shield, color: 'text-primary-400' }
                 ].map((stat, i) => (
                     <motion.div key={i} whileHover={{ y: -5 }} className="p-6 bg-slate-900/40 rounded-3xl border border-white/5 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-700">
@@ -178,7 +186,14 @@ const UniversityAnalyticsReport = () => {
                                     ))}
                                 </Pie>
                                 <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '10px' }} />
-                                <Legend formatter={(val) => <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 ml-2">{val}</span>} />
+                                <Legend 
+                                    layout="vertical" 
+                                    align="right" 
+                                    verticalAlign="middle"
+                                    iconType="circle"
+                                    formatter={(val) => <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 ml-2">{val.length > 15 ? val.slice(0, 15) + '...' : val}</span>}
+                                    wrapperStyle={{ paddingLeft: '20px' }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
