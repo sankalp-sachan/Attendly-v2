@@ -281,6 +281,7 @@ const UniversityAnalyticsReport = () => {
                                         boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
                                     }}
                                     itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
+                                    labelStyle={{ color: '#fff', fontWeight: 900, fontSize: '12px' }}
                                 />
                                 <Bar dataKey="percentage" radius={[10, 10, 0, 0]} barSize={34}>
                                     {currentData?.map((entry, index) => (
@@ -330,6 +331,8 @@ const UniversityAnalyticsReport = () => {
                                         borderRadius: '16px',
                                         fontSize: '10px'
                                     }} 
+                                    itemStyle={{ color: '#fff', fontWeight: 900 }}
+                                    labelStyle={{ color: '#fff', fontWeight: 900, fontSize: '12px' }}
                                 />
                                 <Legend 
                                     layout="vertical" 
