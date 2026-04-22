@@ -26,7 +26,22 @@ const UniversityAnalyticsReport = () => {
 
     useEffect(() => {
         fetchLiveData();
+        fetchArchivedData();
     }, []);
+
+    const fetchArchivedData = async () => {
+        try {
+            const res = await api.get('/analytics/department-wise?mode=archived');
+            if (res.data && res.data.length > 0) {
+                setImportedData(res.data);
+                if (res.data[0].fileName) {
+                    setUploadedFileName(res.data[0].fileName);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch archived analytics", error);
+        }
+    };
 
     const fetchLiveData = async () => {
         setLoading(true);
@@ -126,8 +141,8 @@ const UniversityAnalyticsReport = () => {
                                 Live Engine
                             </button>
                             <button 
-                                onClick={() => importedData && setViewMode('imported')}
-                                className={`px-6 py-2 rounded-lg font-black text-[9px] uppercase tracking-[0.2em] transition-all duration-500 ${!importedData ? 'opacity-20 cursor-not-allowed' : ''} ${viewMode === 'imported' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                                onClick={() => setViewMode('imported')}
+                                className={`px-6 py-2 rounded-lg font-black text-[9px] uppercase tracking-[0.2em] transition-all duration-500 ${viewMode === 'imported' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
                             >
                                 Archive Data
                             </button>
@@ -305,7 +320,7 @@ const UniversityAnalyticsReport = () => {
                                     cx="45%" cy="50%" 
                                     innerRadius={80} outerRadius={110} 
                                     paddingAngle={8} 
-                                    dataKey={viewMode === 'live' ? "totalRecords" : "total"} 
+                                    dataKey="total" 
                                     nameKey="department"
                                     stroke="none"
                                 >
