@@ -303,9 +303,9 @@ const UniversityAnalyticsReport = () => {
                         <div>
                             <h2 className="text-xl font-black text-white tracking-tighter flex items-center gap-3">
                                 <LayoutDashboard className="w-5 h-5 text-indigo-500" />
-                                Resource Allocation
+                                Attendance Consistency
                             </h2>
-                            <p className="text-slate-500 font-bold text-[9px] uppercase tracking-widest mt-2">Volume Distribution by Sector</p>
+                            <p className="text-slate-500 font-bold text-[9px] uppercase tracking-widest mt-2">Relative Performance by Sector</p>
                         </div>
                     </div>
                     <div className="h-[350px] w-full">
@@ -316,7 +316,7 @@ const UniversityAnalyticsReport = () => {
                                     cx="45%" cy="50%" 
                                     innerRadius={80} outerRadius={110} 
                                     paddingAngle={8} 
-                                    dataKey="total" 
+                                    dataKey="percentage" 
                                     nameKey="department"
                                     stroke="none"
                                 >
