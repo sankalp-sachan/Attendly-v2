@@ -371,7 +371,6 @@ const UniversityAnalyticsReport = () => {
                             <tr className="bg-slate-900/60 text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">
                                 <th className="px-10 py-6">Intelligence Sector</th>
                                 <th className="px-10 py-6">Engagement Status</th>
-                                <th className="px-10 py-6">Node Population</th>
                                 <th className="px-10 py-6 text-right">Coefficient</th>
                             </tr>
                         </thead>
@@ -396,12 +395,6 @@ const UniversityAnalyticsReport = () => {
                                                     className={`h-full rounded-full ${item.percentage > 75 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-primary-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]'}`}
                                                 />
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-8">
-                                        <div className="flex flex-col">
-                                            <span className="text-xs font-black text-white tracking-tight">{item.presentStudents || item.presentRecords || item.present} / {item.totalStudents || item.totalRecords || item.total}</span>
-                                            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest mt-1">Personnel Synchronized</span>
                                         </div>
                                     </td>
                                     <td className="px-10 py-8 text-right">
