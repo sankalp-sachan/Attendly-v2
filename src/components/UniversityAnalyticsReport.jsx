@@ -215,7 +215,7 @@ const UniversityAnalyticsReport = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                            {currentData?.sort((a,b) => b.percentage - a.percentage).map((item, i) => (
+                            {(currentData ? [...currentData].sort((a, b) => b.percentage - a.percentage) : []).map((item, i) => (
                                 <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
                                     <td className="px-8 py-5 font-black text-white text-xs uppercase tracking-wider">{item.department}</td>
                                     <td className="px-8 py-5 text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.presentStudents || item.presentRecords || item.present} / {item.totalStudents || item.totalRecords || item.total}</td>

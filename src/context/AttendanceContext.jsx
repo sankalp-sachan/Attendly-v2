@@ -29,6 +29,12 @@ export const AttendanceProvider = ({ children }) => {
     useEffect(() => {
         const fetchClasses = async () => {
             if (user) {
+                // Skip class syncing for admin roles to prevent 403 errors on college routes
+                if (['admin', 'assistant_admin', 'hod'].includes(user.role)) {
+                    setClasses([]);
+                    return;
+                }
+
                 try {
                     const endpoint = (user.role === 'teacher') ? '/college/teacher/classes' : '/college/student/classes';
                     const { data } = await api.get(endpoint);
