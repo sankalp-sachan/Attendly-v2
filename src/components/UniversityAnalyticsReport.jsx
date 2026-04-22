@@ -56,22 +56,24 @@ const UniversityAnalyticsReport = () => {
     };
 
     const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length === 0) return;
 
         setUploading(true);
         const formData = new FormData();
-        formData.append('file', file);
+        selectedFiles.forEach(file => {
+            formData.append('files', file);
+        });
 
         try {
             const res = await api.post('/analytics/import-excel', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setImportedData(res.data.analytics);
-            setUploadedFileName(file.name);
+            setUploadedFileName(res.data.fileName || selectedFiles.map(f => f.name).join(', '));
             setViewMode('imported');
         } catch (error) {
-            alert(error.response?.data?.message || "Failed to upload excel");
+            alert(error.response?.data?.message || "Failed to upload dataset");
         } finally {
             setUploading(false);
         }
@@ -169,7 +171,7 @@ const UniversityAnalyticsReport = () => {
                                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                                 {uploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 group-hover:scale-110 transition-transform" />}
                                 {uploading ? 'Processing...' : 'Import Dataset'}
-                                <input type="file" className="hidden" accept=".xlsx, .xls" onChange={handleFileUpload} disabled={uploading} />
+                                <input type="file" className="hidden" accept=".xlsx, .xls" onChange={handleFileUpload} disabled={uploading} multiple />
                             </label>
                             {uploadedFileName && (
                                 <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest text-center truncate max-w-[150px]">
