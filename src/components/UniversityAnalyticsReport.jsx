@@ -184,7 +184,7 @@ const UniversityAnalyticsReport = () => {
             </div>
 
             {/* KPI Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
                 {[
                     { 
                         label: 'Engagement Coefficient', 
@@ -206,13 +206,6 @@ const UniversityAnalyticsReport = () => {
                         icon: Award, 
                         color: 'text-amber-400',
                         sub: 'Highest Performance'
-                    },
-                    { 
-                        label: 'Registry Volume', 
-                        val: stats.total.toLocaleString(), 
-                        icon: Shield, 
-                        color: 'text-primary-400',
-                        sub: 'Total Entities'
                     }
                 ].map((stat, i) => (
                     <motion.div 
