@@ -11,14 +11,17 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import * as XLSX from 'xlsx';
+import { useAuth } from '../context/AuthContext';
 
 const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'];
 
 const UniversityAnalyticsReport = () => {
+    const { user } = useAuth();
     const [liveData, setLiveData] = useState([]);
     const [importedData, setImportedData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [uploadedFileName, setUploadedFileName] = useState('');
     const [viewMode, setViewMode] = useState('live'); // 'live' or 'imported'
 
     useEffect(() => {
@@ -50,6 +53,7 @@ const UniversityAnalyticsReport = () => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setImportedData(res.data.analytics);
+            setUploadedFileName(file.name);
             setViewMode('imported');
         } catch (error) {
             alert(error.response?.data?.message || "Failed to upload excel");
@@ -143,12 +147,22 @@ const UniversityAnalyticsReport = () => {
                         <FileSpreadsheet className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                         Download Schema
                     </button>
-                    <label className="flex-1 lg:flex-none cursor-pointer group flex items-center justify-center gap-3 px-8 py-4 bg-primary-600 hover:bg-primary-500 rounded-2xl shadow-2xl shadow-primary-600/20 transition-all text-white text-[10px] font-black uppercase tracking-widest relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        {uploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 group-hover:scale-110 transition-transform" />}
-                        Import Dataset
-                        <input type="file" className="hidden" accept=".xlsx, .xls" onChange={handleFileUpload} disabled={uploading} />
-                    </label>
+                    
+                    {['admin', 'assistant_admin'].includes(user?.role) && (
+                        <div className="flex flex-col gap-2">
+                             <label className="flex-1 lg:flex-none cursor-pointer group flex items-center justify-center gap-3 px-8 py-4 bg-primary-600 hover:bg-primary-500 rounded-2xl shadow-2xl shadow-primary-600/20 transition-all text-white text-[10px] font-black uppercase tracking-widest relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                {uploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 group-hover:scale-110 transition-transform" />}
+                                {uploading ? 'Processing...' : 'Import Dataset'}
+                                <input type="file" className="hidden" accept=".xlsx, .xls" onChange={handleFileUpload} disabled={uploading} />
+                            </label>
+                            {uploadedFileName && (
+                                <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest text-center truncate max-w-[150px]">
+                                    Active: {uploadedFileName}
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
