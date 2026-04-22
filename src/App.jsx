@@ -39,6 +39,7 @@ import QuizCreate from './pages/Quiz/QuizCreate';
 import QuizTake from './pages/Quiz/QuizTake';
 import QuizTeacherResults from './pages/Quiz/QuizTeacherResults';
 import QuizResultView from './pages/Quiz/QuizResultView';
+import UniversityAnalytics from './pages/UniversityAnalytics';
 
 function App() {
   const [loading, setLoading] = React.useState(() => {
@@ -176,6 +177,15 @@ function App() {
                     element={
                       <RoleRoute allowedRoles={['hod', 'admin']}>
                         <HODDashboard />
+                      </RoleRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/university-analytics"
+                    element={
+                      <RoleRoute allowedRoles={['admin', 'assistant_admin', 'hod']}>
+                        <UniversityAnalytics />
                       </RoleRoute>
                     }
                   />

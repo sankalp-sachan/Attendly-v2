@@ -6,6 +6,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import UniversityAnalyticsReport from '../components/UniversityAnalyticsReport';
 
 const AdminDashboard = () => {
     const { user, logout, deleteUser } = useAuth();
@@ -14,7 +15,7 @@ const AdminDashboard = () => {
     const [classesList, setClassesList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [tab, setTab] = useState('users'); // 'users', 'departments', 'audit'
+    const [tab, setTab] = useState('analytics'); // Default to analytics as requested
     const [showDeptModal, setShowDeptModal] = useState(false);
     const [newDept, setNewDept] = useState({ name: '', code: '', description: '' });
     const navigate = useNavigate();
@@ -208,7 +209,7 @@ const AdminDashboard = () => {
 
                 {/* Dashboard Nav */}
                 <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-none">
-                    {['users', 'departments', 'classes'].map((t) => (
+                    {['analytics', 'users', 'departments', 'classes'].map((t) => (
                         <button
                             key={t}
                             onClick={() => setTab(t)}
@@ -218,6 +219,10 @@ const AdminDashboard = () => {
                         </button>
                     ))}
                 </div>
+
+                {tab === 'analytics' && (
+                    <UniversityAnalyticsReport />
+                )}
 
                 {tab === 'users' && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">

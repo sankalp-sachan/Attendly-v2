@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Users, Building, BarChart3, Bell, Settings, LogOut, CheckCircle, XCircle, Clock, ChevronRight, FileText, Activity } from 'lucide-react';
+import { Shield, Users, Building, BarChart3, Bell, Settings, LogOut, CheckCircle, XCircle, Clock, ChevronRight, FileText, Activity, BrainCircuit } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 const HODDashboard = () => {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState([]);
@@ -110,6 +112,12 @@ const HODDashboard = () => {
                             <span className="relative z-10">{t}</span>
                         </button>
                     ))}
+                    <button
+                        onClick={() => navigate('/university-analytics')}
+                        className="px-8 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] transition-all bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white"
+                    >
+                        Intelligence Hub
+                    </button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
