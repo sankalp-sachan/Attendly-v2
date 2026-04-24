@@ -288,20 +288,7 @@ const SplashScreen = ({ onFinish }) => {
                                     className="mt-10 flex items-center gap-6"
                                 >
                                     <div className="h-px w-8 bg-slate-800" />
-                                    <div className="flex gap-2">
-                                        {["Developed", "by", "Sankalp", "Sachan"].map((word, i) => (
-                                            <motion.span
-                                                key={word}
-                                                variants={{
-                                                    hidden: { opacity: 0, y: 5 },
-                                                    visible: { opacity: 1, y: 0 }
-                                                }}
-                                                className="text-[10px] md:text-xs text-slate-400 tracking-[0.3em] font-medium uppercase font-sans"
-                                            >
-                                                {word}
-                                            </motion.span>
-                                        ))}
-                                    </div>
+                                    
                                     <div className="h-px w-8 bg-slate-800" />
                                 </motion.div>
                             </motion.div>
