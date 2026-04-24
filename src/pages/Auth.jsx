@@ -155,22 +155,8 @@ const Auth = () => {
                                     <User className="w-6 h-6 text-primary-400 relative z-10" />
                                 </div>
                             </div>
-                            <div>
-                                <p className="text-[10px] font-black text-primary-500 uppercase tracking-[0.3em] mb-0.5">Architect & Dev</p>
-                                <h4 className="text-white font-bold tracking-tight">Sankalp Sachan</h4>
-                            </div>
                         </motion.div>
 
-                        <a
-                            href="https://sankalpsachan.vercel.app"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <span className="relative z-10 text-[10px] font-black text-white uppercase tracking-[0.2em] group-hover:text-primary-400 transition-colors">Visit Portfolio</span>
-                            <ArrowRight className="relative z-10 w-4 h-4 text-primary-500 group-hover:translate-x-1 transition-transform" />
-                        </a>
                     </div>
                 </div>
 
