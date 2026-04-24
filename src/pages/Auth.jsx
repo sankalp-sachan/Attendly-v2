@@ -142,20 +142,7 @@ const Auth = () => {
 
                     <div className="relative z-10 mt-20">
                         {/* Premium Developer Badge */}
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="flex items-center gap-4 mb-8"
-                        >
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-primary-500 rounded-full blur-md opacity-40 animate-pulse"></div>
-                                <div className="relative w-12 h-12 rounded-full border border-white/20 bg-gradient-to-tr from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden shadow-2xl">
-                                    <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent,rgba(79,70,229,0.3),transparent)] animate-spin-slow"></div>
-                                    <User className="w-6 h-6 text-primary-400 relative z-10" />
-                                </div>
-                            </div>
-                        </motion.div>
+                        
 
                     </div>
                 </div>
