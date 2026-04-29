@@ -58,6 +58,28 @@ const StudentDashboard = () => {
     });
     const [profileMessage, setProfileMessage] = useState('');
 
+    // Gyan Sanchay Search State
+    const [extSearchQuery, setExtSearchQuery] = useState('');
+    const [extSearchResults, setExtSearchResults] = useState([]);
+    const [searchingExt, setSearchingExt] = useState(false);
+    const [extSearchError, setExtSearchError] = useState('');
+
+    const handleExtSearch = async (e) => {
+        e.preventDefault();
+        if (!extSearchQuery.trim()) return;
+
+        setSearchingExt(true);
+        setExtSearchError('');
+        try {
+            const { data } = await api.get(`/notes/external/search?query=${encodeURIComponent(extSearchQuery)}`);
+            setExtSearchResults(data);
+        } catch (error) {
+            setExtSearchError(error.response?.data?.message || 'Search failed. Please try again.');
+        } finally {
+            setSearchingExt(false);
+        }
+    };
+
     useEffect(() => {
         fetchStudentClasses();
     }, []);
@@ -370,7 +392,86 @@ const StudentDashboard = () => {
                         </h2>
                         <p className="text-slate-400 text-xs md:text-sm font-medium mt-1 uppercase tracking-wider opacity-60">Access official Gyan Sanchay platform for study materials</p>
                     </div>
+                    
+                    {/* External Search Bar */}
+                    <form onSubmit={handleExtSearch} className="w-full md:w-auto flex-1 md:max-w-md relative group mt-4 md:mt-0">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-amber-500 transition-colors" />
+                        <input
+                            type="text"
+                            className="input-field pl-12 pr-28 border-white/5 focus:border-amber-500/50"
+                            placeholder="Search Gyan Sanchay notes..."
+                            value={extSearchQuery}
+                            onChange={(e) => setExtSearchQuery(e.target.value)}
+                        />
+                        <button
+                            type="submit"
+                            disabled={searchingExt}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
+                        >
+                            {searchingExt ? 'Searching...' : 'Search'}
+                        </button>
+                    </form>
                 </div>
+
+                {/* External Search Results */}
+                {extSearchResults.length > 0 && (
+                    <div className="mb-12 relative z-20">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em] text-amber-500 flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                                Gyan Sanchay Results ({extSearchResults.length})
+                            </h3>
+                            <button
+                                onClick={() => {
+                                    setExtSearchResults([]);
+                                    setExtSearchQuery('');
+                                }}
+                                className="text-[10px] font-black uppercase tracking-wider text-slate-500 hover:text-rose-400 transition-colors"
+                            >
+                                Clear Results
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {extSearchResults.map((result) => (
+                                <motion.div
+                                    key={`ext-${result.id}`}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    whileHover={{ y: -4 }}
+                                    className="card bg-slate-900/40 border-amber-500/10 hover:border-amber-500/30 rounded-[2rem] p-6 flex flex-col justify-between group relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="relative z-10">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
+                                                <FileText className="w-5 h-5" />
+                                            </div>
+                                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{new Date(result.date).toLocaleDateString()}</span>
+                                        </div>
+                                        <h4 className="text-white font-black text-lg tracking-tight mb-2 line-clamp-2" title={result.title}>{result.title}</h4>
+                                        <p className="text-slate-400 text-xs font-medium leading-relaxed mb-4 line-clamp-3">{result.description}</p>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-white/5 relative z-10">
+                                        <a
+                                            href={result.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl text-center block hover:bg-amber-400 transition-all font-sans"
+                                        >
+                                            View Study Material
+                                        </a>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {extSearchError && (
+                    <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 font-bold text-xs">
+                        {extSearchError}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-20">
                     {enrolledClasses.map((cls) => (
