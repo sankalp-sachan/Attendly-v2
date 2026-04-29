@@ -63,6 +63,7 @@ const StudentDashboard = () => {
     const [extSearchResults, setExtSearchResults] = useState([]);
     const [searchingExt, setSearchingExt] = useState(false);
     const [extSearchError, setExtSearchError] = useState('');
+    const [downloadingFileId, setDownloadingFileId] = useState(null);
 
     const handleExtSearch = async (e) => {
         e.preventDefault();
@@ -77,6 +78,41 @@ const StudentDashboard = () => {
             setExtSearchError(error.response?.data?.message || 'Search failed. Please try again.');
         } finally {
             setSearchingExt(false);
+        }
+    };
+
+    const downloadExternalFile = async (result) => {
+        if (result.fileType === 'link') {
+            window.open(result.link, '_blank');
+            return;
+        }
+
+        setDownloadingFileId(result.id);
+        try {
+            const response = await api.get('/notes/download-proxy', {
+                params: { 
+                    url: result.link, 
+                    filename: `${result.title.replace(/[^a-zA-Z0-9\s]/g, '')}.${result.fileType}` 
+                },
+                responseType: 'blob'
+            });
+
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const downloadUrl = window.URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.setAttribute('download', `${result.title.replace(/[^a-zA-Z0-9\s]/g, '')}.${result.fileType}`);
+            document.body.appendChild(link);
+            link.click();
+            
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.error("Direct download failed:", error);
+            window.open(result.link, '_blank');
+        } finally {
+            setDownloadingFileId(null);
         }
     };
 
@@ -454,15 +490,19 @@ const StudentDashboard = () => {
                                         <p className="text-slate-400 text-xs font-medium leading-relaxed mb-4 line-clamp-3">{result.description}</p>
                                     </div>
                                     <div className="mt-4 pt-4 border-t border-white/5 relative z-10">
-                                        <a
-                                            href={result.link}
-                                            download={result.fileType !== 'link'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="w-full py-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl text-center block hover:bg-amber-400 transition-all font-sans flex items-center justify-center gap-2 shadow-lg"
+                                        <button
+                                            onClick={() => downloadExternalFile(result)}
+                                            disabled={downloadingFileId === result.id}
+                                            className="w-full py-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl text-center block hover:bg-amber-400 transition-all font-sans flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {result.fileType === 'link' ? 'View Post Online' : 'Download Material'}
-                                        </a>
+                                            {downloadingFileId === result.id ? (
+                                                'Downloading...'
+                                            ) : result.fileType === 'link' ? (
+                                                'View Post Online'
+                                            ) : (
+                                                'Download Material'
+                                            )}
+                                        </button>
                                     </div>
                                 </motion.div>
                             ))}
