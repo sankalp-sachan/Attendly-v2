@@ -83,7 +83,8 @@ const VideoConference = () => {
                 }
 
                 // Connect to socket signaling server
-                const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const socketUrl = isLocal ? 'http://localhost:5000' : 'https://attendly-v2-backend.onrender.com';
                 socketRef.current = io(socketUrl);
 
                 socketRef.current.emit('join-room', {
