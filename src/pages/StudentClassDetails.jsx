@@ -69,6 +69,14 @@ const StudentClassDetails = () => {
         fetchClassDetails();
     }, [classId]);
 
+    useEffect(() => {
+        if (!classId) return;
+        const interval = setInterval(() => {
+            fetchOnlineClasses();
+        }, 10000);
+        return () => clearInterval(interval);
+    }, [classId]);
+
     const fetchAiInsight = async () => {
         try {
             setLoadingAi(true);

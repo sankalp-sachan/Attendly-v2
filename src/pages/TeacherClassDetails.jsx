@@ -108,6 +108,14 @@ const TeacherClassDetails = () => {
         fetchClassDetails();
     }, [classId]);
 
+    useEffect(() => {
+        if (!classId) return;
+        const interval = setInterval(() => {
+            fetchOnlineClasses();
+        }, 10000);
+        return () => clearInterval(interval);
+    }, [classId]);
+
     const fetchClassDetails = async () => {
         try {
             const { data } = await api.get(`/college/teacher/classes/${classId}`);
