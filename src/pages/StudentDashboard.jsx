@@ -446,7 +446,9 @@ const StudentDashboard = () => {
                                             <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
                                                 <FileText className="w-5 h-5" />
                                             </div>
-                                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{new Date(result.date).toLocaleDateString()}</span>
+                                            <span className="text-[8px] font-black uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-lg">
+                                                {result.fileType === 'link' ? 'Read Online' : `${result.fileType.toUpperCase()} File`}
+                                            </span>
                                         </div>
                                         <h4 className="text-white font-black text-lg tracking-tight mb-2 line-clamp-2" title={result.title}>{result.title}</h4>
                                         <p className="text-slate-400 text-xs font-medium leading-relaxed mb-4 line-clamp-3">{result.description}</p>
@@ -454,11 +456,12 @@ const StudentDashboard = () => {
                                     <div className="mt-4 pt-4 border-t border-white/5 relative z-10">
                                         <a
                                             href={result.link}
+                                            download={result.fileType !== 'link'}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-full py-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl text-center block hover:bg-amber-400 transition-all font-sans"
+                                            className="w-full py-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl text-center block hover:bg-amber-400 transition-all font-sans flex items-center justify-center gap-2 shadow-lg"
                                         >
-                                            View Study Material
+                                            {result.fileType === 'link' ? 'View Post Online' : 'Download Material'}
                                         </a>
                                     </div>
                                 </motion.div>
