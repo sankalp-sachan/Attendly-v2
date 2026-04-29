@@ -390,7 +390,7 @@ const StudentDashboard = () => {
                             <div className="w-2 h-8 bg-amber-500 rounded-full" />
                             E-Learning & Notes Repository
                         </h2>
-                        <p className="text-slate-400 text-xs md:text-sm font-medium mt-1 uppercase tracking-wider opacity-60">Access official Gyan Sanchay platform for study materials</p>
+                        <p className="text-slate-400 text-xs md:text-sm font-medium mt-1 uppercase tracking-wider opacity-60">Notes sourced from GYANSANCHAY (Official University Platform).</p>
                     </div>
                     
                     {/* External Search Bar */}
