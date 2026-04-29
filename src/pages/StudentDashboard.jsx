@@ -63,8 +63,6 @@ const StudentDashboard = () => {
     const [extSearchResults, setExtSearchResults] = useState([]);
     const [searchingExt, setSearchingExt] = useState(false);
     const [extSearchError, setExtSearchError] = useState('');
-    const [downloadingFileId, setDownloadingFileId] = useState(null);
-    const [hasSearchedExt, setHasSearchedExt] = useState(false);
 
     const handleExtSearch = async (e) => {
         e.preventDefault();
@@ -72,50 +70,13 @@ const StudentDashboard = () => {
 
         setSearchingExt(true);
         setExtSearchError('');
-        setHasSearchedExt(false);
         try {
             const { data } = await api.get(`/notes/external/search?query=${encodeURIComponent(extSearchQuery)}`);
             setExtSearchResults(data);
-            setHasSearchedExt(true);
         } catch (error) {
             setExtSearchError(error.response?.data?.message || 'Search failed. Please try again.');
         } finally {
             setSearchingExt(false);
-        }
-    };
-
-    const downloadExternalFile = async (result) => {
-        if (result.fileType === 'link') {
-            window.open(result.link, '_blank');
-            return;
-        }
-
-        setDownloadingFileId(result.id);
-        try {
-            const response = await api.get('/notes/download-proxy', {
-                params: { 
-                    url: result.link, 
-                    filename: `${result.title.replace(/[^a-zA-Z0-9\s]/g, '')}.${result.fileType}` 
-                },
-                responseType: 'blob'
-            });
-
-            const blob = new Blob([response.data], { type: response.headers['content-type'] });
-            const downloadUrl = window.URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.setAttribute('download', `${result.title.replace(/[^a-zA-Z0-9\s]/g, '')}.${result.fileType}`);
-            document.body.appendChild(link);
-            link.click();
-            
-            link.parentNode.removeChild(link);
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            console.error("Direct download failed:", error);
-            window.open(result.link, '_blank');
-        } finally {
-            setDownloadingFileId(null);
         }
     };
 
@@ -452,18 +413,6 @@ const StudentDashboard = () => {
                     </form>
                 </div>
 
-                {/* External Search Feedback */}
-                {extSearchError && (
-                    <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl text-xs font-semibold tracking-wide text-center relative z-20">
-                        {extSearchError}
-                    </div>
-                )}
-                {hasSearchedExt && extSearchResults.length === 0 && (
-                    <div className="mb-8 p-6 bg-slate-900/40 border border-white/5 text-slate-400 rounded-2xl text-xs font-semibold tracking-wide text-center relative z-20">
-                        No materials found on Gyan Sanchay matching your search query.
-                    </div>
-                )}
-
                 {/* External Search Results */}
                 {extSearchResults.length > 0 && (
                     <div className="mb-12 relative z-20">
@@ -497,27 +446,20 @@ const StudentDashboard = () => {
                                             <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
                                                 <FileText className="w-5 h-5" />
                                             </div>
-                                            <span className="text-[8px] font-black uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-lg">
-                                                {result.fileType === 'link' ? 'Read Online' : `${result.fileType.toUpperCase()} File`}
-                                            </span>
+                                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{new Date(result.date).toLocaleDateString()}</span>
                                         </div>
                                         <h4 className="text-white font-black text-lg tracking-tight mb-2 line-clamp-2" title={result.title}>{result.title}</h4>
                                         <p className="text-slate-400 text-xs font-medium leading-relaxed mb-4 line-clamp-3">{result.description}</p>
                                     </div>
                                     <div className="mt-4 pt-4 border-t border-white/5 relative z-10">
-                                        <button
-                                            onClick={() => downloadExternalFile(result)}
-                                            disabled={downloadingFileId === result.id}
-                                            className="w-full py-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl text-center block hover:bg-amber-400 transition-all font-sans flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                        <a
+                                            href={result.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-3 bg-amber-500 text-slate-950 font-black text-[10px] uppercase tracking-widest rounded-xl text-center block hover:bg-amber-400 transition-all font-sans"
                                         >
-                                            {downloadingFileId === result.id ? (
-                                                'Downloading...'
-                                            ) : result.fileType === 'link' ? (
-                                                'View Post Online'
-                                            ) : (
-                                                'Download Material'
-                                            )}
-                                        </button>
+                                            View Study Material
+                                        </a>
                                     </div>
                                 </motion.div>
                             ))}
