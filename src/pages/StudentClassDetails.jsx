@@ -562,11 +562,20 @@ const StudentClassDetails = () => {
                     <ClassFeed classId={classId} />
                 </div>
 
-                <div className="mb-8">
+                <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
                         <div className="w-2 h-8 bg-indigo-600 rounded-full" />
                         Shared Academic Assets
                     </h2>
+                    <a
+                        href="https://gyansanchay.csjmu.ac.in/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-3 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-amber-500/20 hover:border-amber-500 flex items-center gap-2 shadow-lg group"
+                    >
+                        <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                        Explore Gyan Sanchay Notes
+                    </a>
                 </div>
 
                 {notes.length === 0 ? (

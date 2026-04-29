@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, BookOpen, TrendingUp, AlertCircle, LogOut, Bell, Key, MessageCircle, XCircle, GraduationCap, School, ArrowRight, User } from 'lucide-react';
+import { Search, BookOpen, TrendingUp, AlertCircle, LogOut, Bell, Key, MessageCircle, XCircle, GraduationCap, School, ArrowRight, User, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
@@ -359,6 +359,87 @@ const StudentDashboard = () => {
                             </button>
                         </div>
                     )}
+                </div>
+
+                {/* Notes Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 mt-16 gap-4">
+                    <div>
+                        <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter flex items-center gap-3">
+                            <div className="w-2 h-8 bg-amber-500 rounded-full" />
+                            E-Learning & Notes Repository
+                        </h2>
+                        <p className="text-slate-400 text-xs md:text-sm font-medium mt-1 uppercase tracking-wider opacity-60">Access official Gyan Sanchay platform for study materials</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-20">
+                    {enrolledClasses.map((cls) => (
+                        <motion.div
+                            key={`notes-${cls._id}`}
+                            whileHover={{ y: -4 }}
+                            className="card bg-slate-900/40 border-white/5 rounded-[2rem] p-6 md:p-8 relative overflow-hidden group flex flex-col justify-between"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-lg">
+                                        <BookOpen className="w-6 h-6" />
+                                    </div>
+                                    <span className="text-[10px] font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg uppercase tracking-wider">Notes Available</span>
+                                </div>
+                                <h3 className="text-xl font-black text-white tracking-tight leading-tight mb-2 truncate" title={cls.subject}>
+                                    {cls.subject}
+                                </h3>
+                                <p className="text-slate-400 text-xs font-medium mb-1 truncate">{cls.name}</p>
+                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Instructor: Prof. {cls.user?.name || 'N/A'}</p>
+                            </div>
+                            
+                            <div className="mt-6 pt-4 border-t border-white/5 relative z-10">
+                                <a
+                                    href="https://gyansanchay.csjmu.ac.in/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full py-3 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-amber-500/20 hover:border-amber-500 group/btn flex items-center justify-center gap-2"
+                                >
+                                    <FileText className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                    Access Gyan Sanchay Notes
+                                </a>
+                            </div>
+                        </motion.div>
+                    ))}
+
+                    {/* General Gyan Sanchay Card */}
+                    <motion.div
+                        whileHover={{ y: -4 }}
+                        className="card bg-slate-900/40 border-white/5 rounded-[2rem] p-6 md:p-8 relative overflow-hidden group flex flex-col justify-between border-dashed border-slate-700/50"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 bg-primary-500/10 rounded-2xl flex items-center justify-center text-primary-400 border border-primary-500/20 shadow-lg">
+                                    <GraduationCap className="w-6 h-6" />
+                                </div>
+                                <span className="text-[10px] font-black text-primary-400 bg-primary-500/10 px-2.5 py-1 rounded-lg uppercase tracking-wider">General Hub</span>
+                            </div>
+                            <h3 className="text-xl font-black text-white tracking-tight leading-tight mb-2">
+                                All Course Materials
+                            </h3>
+                            <p className="text-slate-400 text-xs font-medium mb-1">Gyan Sanchay Global Portal</p>
+                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Access overall e-content database</p>
+                        </div>
+                        
+                        <div className="mt-6 pt-4 border-t border-white/5 relative z-10">
+                            <a
+                                href="https://gyansanchay.csjmu.ac.in/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full py-3 bg-primary-500/10 hover:bg-primary-500 text-primary-400 hover:text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-primary-500/20 hover:border-primary-500 group/btn flex items-center justify-center gap-2"
+                            >
+                                <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                Browse Full Portal
+                            </a>
+                        </div>
+                    </motion.div>
                 </div>
             </div>
 
