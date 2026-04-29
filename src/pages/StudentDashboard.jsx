@@ -64,6 +64,7 @@ const StudentDashboard = () => {
     const [searchingExt, setSearchingExt] = useState(false);
     const [extSearchError, setExtSearchError] = useState('');
     const [downloadingFileId, setDownloadingFileId] = useState(null);
+    const [hasSearchedExt, setHasSearchedExt] = useState(false);
 
     const handleExtSearch = async (e) => {
         e.preventDefault();
@@ -71,9 +72,11 @@ const StudentDashboard = () => {
 
         setSearchingExt(true);
         setExtSearchError('');
+        setHasSearchedExt(false);
         try {
             const { data } = await api.get(`/notes/external/search?query=${encodeURIComponent(extSearchQuery)}`);
             setExtSearchResults(data);
+            setHasSearchedExt(true);
         } catch (error) {
             setExtSearchError(error.response?.data?.message || 'Search failed. Please try again.');
         } finally {
@@ -448,6 +451,18 @@ const StudentDashboard = () => {
                         </button>
                     </form>
                 </div>
+
+                {/* External Search Feedback */}
+                {extSearchError && (
+                    <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl text-xs font-semibold tracking-wide text-center relative z-20">
+                        {extSearchError}
+                    </div>
+                )}
+                {hasSearchedExt && extSearchResults.length === 0 && (
+                    <div className="mb-8 p-6 bg-slate-900/40 border border-white/5 text-slate-400 rounded-2xl text-xs font-semibold tracking-wide text-center relative z-20">
+                        No materials found on Gyan Sanchay matching your search query.
+                    </div>
+                )}
 
                 {/* External Search Results */}
                 {extSearchResults.length > 0 && (
