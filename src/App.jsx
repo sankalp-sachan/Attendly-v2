@@ -40,6 +40,7 @@ import QuizTake from './pages/Quiz/QuizTake';
 import QuizTeacherResults from './pages/Quiz/QuizTeacherResults';
 import QuizResultView from './pages/Quiz/QuizResultView';
 import UniversityAnalytics from './pages/UniversityAnalytics';
+import VideoConference from './pages/VideoConference';
 
 function App() {
   const [loading, setLoading] = React.useState(() => {
@@ -187,6 +188,15 @@ function App() {
                       <RoleRoute allowedRoles={['admin', 'assistant_admin', 'hod']}>
                         <UniversityAnalytics />
                       </RoleRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/video-conference/:roomId"
+                    element={
+                      <ProtectedRoute>
+                        <VideoConference />
+                      </ProtectedRoute>
                     }
                   />
 

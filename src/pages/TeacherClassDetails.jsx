@@ -93,6 +93,17 @@ const TeacherClassDetails = () => {
     const [reportEndDate, setReportEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [isDownloadingDaily, setIsDownloadingDaily] = useState(false);
 
+    // Video Conference / Online Classes State
+    const [onlineClasses, setOnlineClasses] = useState([]);
+    const [isFetchingOnlineClasses, setIsFetchingOnlineClasses] = useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState(false);
+    const [onlineClassTitle, setOnlineClassTitle] = useState('');
+    const [onlineClassDescription, setOnlineClassDescription] = useState('');
+    const [onlineClassScheduledAt, setOnlineClassScheduledAt] = useState(new Date(new Date().getTime() + 30 * 60000).toISOString().slice(0, 16));
+    const [onlineClassDuration, setOnlineClassDuration] = useState(60);
+    const [isSchedulingClass, setIsSchedulingClass] = useState(false);
+    const [isStartingInstantClass, setIsStartingInstantClass] = useState(false);
+
     useEffect(() => {
         fetchClassDetails();
     }, [classId]);
@@ -113,10 +124,72 @@ const TeacherClassDetails = () => {
             fetchQuizzes();
             // Fetch Assignments
             fetchAssignments();
+            // Fetch Online Classes
+            fetchOnlineClasses();
         } catch (error) {
             console.error("Failed to fetch class details");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchOnlineClasses = async () => {
+        setIsFetchingOnlineClasses(true);
+        try {
+            const { data } = await api.get(`/online-classes/class/${classId}`);
+            setOnlineClasses(data);
+        } catch (error) {
+            console.error("Failed to fetch online classes");
+        } finally {
+            setIsFetchingOnlineClasses(false);
+        }
+    };
+
+    const handleScheduleOnlineClass = async (e) => {
+        e.preventDefault();
+        setIsSchedulingClass(true);
+        try {
+            await api.post('/online-classes', {
+                classId,
+                title: onlineClassTitle,
+                description: onlineClassDescription,
+                scheduledAt: onlineClassScheduledAt,
+                duration: onlineClassDuration
+            });
+            setShowScheduleModal(false);
+            setOnlineClassTitle('');
+            setOnlineClassDescription('');
+            fetchOnlineClasses();
+        } catch (error) {
+            alert(error.response?.data?.message || "Failed to schedule online class");
+        } finally {
+            setIsSchedulingClass(false);
+        }
+    };
+
+    const handleStartInstantClass = async () => {
+        setIsStartingInstantClass(true);
+        try {
+            const { data } = await api.post('/online-classes/instant', {
+                classId,
+                title: `Instant Class - ${classData?.name || 'Session'}`,
+                description: 'Instant video class session.'
+            });
+            fetchOnlineClasses();
+            navigate(`/video-conference/${data.roomId}?classId=${classId}&onlineClassId=${data._id}`);
+        } catch (error) {
+            alert(error.response?.data?.message || "Failed to start instant class");
+        } finally {
+            setIsStartingInstantClass(false);
+        }
+    };
+
+    const handleUpdateOnlineStatus = async (id, status) => {
+        try {
+            await api.put(`/online-classes/${id}/status`, { status });
+            fetchOnlineClasses();
+        } catch (error) {
+            alert("Failed to update status");
         }
     };
 
@@ -526,6 +599,209 @@ const TeacherClassDetails = () => {
         }
     };
 
+    const renderOnlineClassesTab = () => {
+        return (
+            <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+                            <div className="w-2 h-8 bg-primary-600 rounded-full" />
+                            Online Video Classes
+                        </h2>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                            Schedule upcoming sessions or launch instant class nodes
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+                        <button
+                            onClick={handleStartInstantClass}
+                            disabled={isStartingInstantClass}
+                            className="btn-primary px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 flex-1 sm:flex-none flex items-center justify-center gap-2"
+                        >
+                            <Video className="w-4 h-4" />
+                            <span>{isStartingInstantClass ? 'Launching...' : 'Start Instant Class'}</span>
+                        </button>
+                        <button
+                            onClick={() => setShowScheduleModal(true)}
+                            className="px-6 py-3 bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest flex-1 sm:flex-none flex items-center justify-center gap-2 transition-all"
+                        >
+                            <Calendar className="w-4 h-4 text-primary-400" />
+                            <span>Schedule Class</span>
+                        </button>
+                    </div>
+                </div>
+
+                {isFetchingOnlineClasses ? (
+                    <div className="p-12 text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
+                    </div>
+                ) : onlineClasses.length === 0 ? (
+                    <div className="p-12 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5 opacity-60">
+                        <Video className="w-12 h-12 text-slate-800 mx-auto mb-4 opacity-40" />
+                        <p className="text-slate-600 font-bold uppercase tracking-[0.25em] text-[10px]">No online class nodes established</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {onlineClasses.map((session) => (
+                            <motion.div
+                                key={session._id}
+                                whileHover={{ y: -5 }}
+                                className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                            >
+                                <div className="absolute top-0 right-0 p-4">
+                                    <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                                        session.status === 'live' 
+                                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse'
+                                            : session.status === 'ended'
+                                                ? 'bg-slate-800 text-slate-500'
+                                                : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                                    }`}>
+                                        {session.status}
+                                    </span>
+                                </div>
+
+                                <div className="mb-6">
+                                    <h4 className="text-white font-black text-lg tracking-tight mb-2 pr-12 truncate">{session.title}</h4>
+                                    <p className="text-slate-500 text-[10px] font-bold leading-relaxed mb-4 line-clamp-2">
+                                        {session.description || 'Virtual pedagogical delivery session.'}
+                                    </p>
+                                    
+                                    <div className="space-y-2 mt-4 pt-4 border-t border-white/5">
+                                        <div className="flex items-center gap-2 text-slate-400">
+                                            <Calendar className="w-3.5 h-3.5 text-primary-400" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                                {new Date(session.scheduledAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-slate-400">
+                                            <Clock className="w-3.5 h-3.5 text-primary-400" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                                {new Date(session.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    {session.status === 'scheduled' && (
+                                        <button
+                                            onClick={() => handleUpdateOnlineStatus(session._id, 'live')}
+                                            className="flex-1 py-3 bg-primary-600 hover:bg-primary-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-primary-500/20 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Video className="w-3.5 h-3.5" />
+                                            <span>Go Live</span>
+                                        </button>
+                                    )}
+                                    {session.status === 'live' && (
+                                        <button
+                                            onClick={() => navigate(`/video-conference/${session.roomId}?classId=${classId}&onlineClassId=${session._id}`)}
+                                            className="flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl animate-pulse shadow-lg shadow-rose-500/20 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Video className="w-3.5 h-3.5" />
+                                            <span>Join Class</span>
+                                        </button>
+                                    )}
+                                    {session.status === 'ended' && (
+                                        <button
+                                            disabled
+                                            className="flex-1 py-3 bg-slate-800 text-slate-600 font-black text-[10px] uppercase tracking-widest rounded-xl disabled:cursor-not-allowed"
+                                        >
+                                            Session Ended
+                                        </button>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Schedule Online Class Modal */}
+                {showScheduleModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-[#020617]/80 backdrop-blur-xl"
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            className="bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] border border-white/10 shadow-2xl p-8 md:p-10 relative"
+                        >
+                            <button onClick={() => setShowScheduleModal(false)} className="absolute top-8 right-8 text-slate-400 hover:text-white transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                            
+                            <div className="mb-8">
+                                <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Schedule Video Class</h2>
+                                <p className="text-slate-500 font-bold uppercase text-[9px] tracking-widest mt-1">Configure virtual instruction instance</p>
+                            </div>
+
+                            <form onSubmit={handleScheduleOnlineClass} className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Class Title</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="input-field bg-black/40 border-white/5 focus:border-primary-500/50"
+                                        placeholder="e.g. Algorithms Module 3 Discussion"
+                                        value={onlineClassTitle}
+                                        onChange={(e) => setOnlineClassTitle(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Description (Optional)</label>
+                                    <textarea
+                                        className="input-field min-h-[100px] resize-none text-sm bg-black/40 border-white/5 focus:border-primary-500/50"
+                                        placeholder="Brief overview of the session goals..."
+                                        value={onlineClassDescription}
+                                        onChange={(e) => setOnlineClassDescription(e.target.value)}
+                                    ></textarea>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Date & Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            required
+                                            className="input-field bg-black/40 border-white/5 focus:border-primary-500/50 text-slate-300"
+                                            value={onlineClassScheduledAt}
+                                            onChange={(e) => setOnlineClassScheduledAt(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Duration (Min)</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            className="input-field bg-black/40 border-white/5 focus:border-primary-500/50"
+                                            value={onlineClassDuration}
+                                            onChange={(e) => setOnlineClassDuration(parseInt(e.target.value))}
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isSchedulingClass}
+                                    className="btn-primary w-full py-5 rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20"
+                                >
+                                    {isSchedulingClass ? (
+                                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+                                    ) : (
+                                        "Deploy Scheduled Session"
+                                    )}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </div>
+        );
+    };
+
     if (loading) return (
         <div className="min-h-screen grid place-items-center bg-slate-50 dark:bg-slate-950">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -636,7 +912,7 @@ const TeacherClassDetails = () => {
                                     className="absolute top-full mt-4 z-50 w-full max-w-2xl bg-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden"
                                 >
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {['overview', 'weekly', 'feed', 'students', 'history', 'analytics', 'reports', 'notes', 'quizzes', 'assignments'].map((tab) => (
+                                        {['overview', 'weekly', 'feed', 'students', 'history', 'analytics', 'reports', 'notes', 'quizzes', 'assignments', 'onlineClasses'].map((tab) => (
                                             <button
                                                 key={tab}
                                                 onClick={() => {
@@ -658,9 +934,10 @@ const TeacherClassDetails = () => {
                                                 {tab === 'notes' && <FileText className="w-6 h-6" />}
                                                 {tab === 'quizzes' && <HelpCircle className="w-6 h-6" />}
                                                 {tab === 'assignments' && <Briefcase className="w-6 h-6" />}
+                                                {tab === 'onlineClasses' && <Video className="w-6 h-6" />}
                                                 
                                                 <span className="text-[10px] font-black uppercase tracking-widest">
-                                                    {tab === 'weekly' ? 'Weekly' : tab}
+                                                    {tab === 'onlineClasses' ? 'Online' : tab === 'weekly' ? 'Weekly' : tab}
                                                 </span>
                                             </button>
                                         ))}
@@ -676,6 +953,7 @@ const TeacherClassDetails = () => {
                     {activeTab === 'feed' && (
                         <ClassFeed classId={classId} />
                     )}
+                    {activeTab === 'onlineClasses' && renderOnlineClassesTab()}
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                             <motion.div

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, TrendingUp, Calendar, AlertCircle, ShieldCheck, Star, FileText, Download, Image, BookOpen, HelpCircle, Award, Clock } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Calendar, AlertCircle, ShieldCheck, Star, FileText, Download, Image, BookOpen, HelpCircle, Award, Clock, Video } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import pptxgen from "pptxgenjs";
 import api from '../utils/api';
@@ -34,6 +34,8 @@ const StudentClassDetails = () => {
     const [responseText, setResponseText] = useState('');
     const [submitFile, setSubmitFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [onlineClasses, setOnlineClasses] = useState([]);
+    const [isFetchingOnlineClasses, setIsFetchingOnlineClasses] = useState(false);
 
     const isUserCR = classData?.CRs?.some(id => (id._id || id) === user?._id);
     const isUserMentor = classData?.mentors?.some(id => (id._id || id) === user?._id);
@@ -56,6 +58,8 @@ const StudentClassDetails = () => {
 
                 // Fetch Assignments
                 fetchAssignments();
+                // Fetch Online Classes
+                fetchOnlineClasses();
             } catch (error) {
                 console.error("Failed to fetch class details");
             } finally {
@@ -193,6 +197,18 @@ const StudentClassDetails = () => {
             console.error("Failed to fetch assignments");
         } finally {
             setIsFetchingAssignments(false);
+        }
+    };
+
+    const fetchOnlineClasses = async () => {
+        setIsFetchingOnlineClasses(true);
+        try {
+            const { data } = await api.get(`/online-classes/class/${classId}`);
+            setOnlineClasses(data);
+        } catch (error) {
+            console.error("Failed to fetch online classes");
+        } finally {
+            setIsFetchingOnlineClasses(false);
         }
     };
 
@@ -436,6 +452,96 @@ const StudentClassDetails = () => {
                         </div>
                     </div>
                 </div>
+
+                <div className="mb-8 mt-4">
+                    <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-8 bg-indigo-600 rounded-full" />
+                        Online Video Classes
+                    </h2>
+                </div>
+
+                {isFetchingOnlineClasses ? (
+                    <div className="p-12 text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
+                    </div>
+                ) : onlineClasses.length === 0 ? (
+                    <div className="p-12 mb-16 text-center bg-slate-900/40 rounded-[2.5rem] border border-white/5 opacity-60">
+                        <Video className="w-12 h-12 text-slate-800 mx-auto mb-4 opacity-40" />
+                        <p className="text-slate-600 font-bold uppercase tracking-[0.25em] text-[10px]">No online class nodes established</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                        {onlineClasses.map((session) => (
+                            <motion.div
+                                key={session._id}
+                                whileHover={{ y: -5 }}
+                                className="card p-6 bg-slate-900/40 border-white/5 relative overflow-hidden group shadow-2xl flex flex-col justify-between"
+                            >
+                                <div className="absolute top-0 right-0 p-4">
+                                    <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                                        session.status === 'live' 
+                                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse'
+                                            : session.status === 'ended'
+                                                ? 'bg-slate-800 text-slate-500'
+                                                : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                                    }`}>
+                                        {session.status}
+                                    </span>
+                                </div>
+
+                                <div className="mb-6">
+                                    <h4 className="text-white font-black text-lg tracking-tight mb-2 pr-12 truncate" title={session.title}>{session.title}</h4>
+                                    <p className="text-slate-500 text-[10px] font-bold leading-relaxed mb-4 line-clamp-2">
+                                        {session.description || 'Virtual pedagogical delivery session.'}
+                                    </p>
+                                    
+                                    <div className="space-y-2 mt-4 pt-4 border-t border-white/5">
+                                        <div className="flex items-center gap-2 text-slate-400">
+                                            <Calendar className="w-3.5 h-3.5 text-primary-400" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                                {new Date(session.scheduledAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-slate-400">
+                                            <Clock className="w-3.5 h-3.5 text-primary-400" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                                {new Date(session.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    {session.status === 'scheduled' && (
+                                        <button
+                                            disabled
+                                            className="flex-1 py-3 bg-slate-800 text-slate-500 font-black text-[10px] uppercase tracking-widest rounded-xl disabled:cursor-not-allowed"
+                                        >
+                                            Scheduled
+                                        </button>
+                                    )}
+                                    {session.status === 'live' && (
+                                        <button
+                                            onClick={() => navigate(`/video-conference/${session.roomId}?classId=${classId}&onlineClassId=${session._id}`)}
+                                            className="flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl animate-pulse shadow-lg shadow-rose-500/20 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Video className="w-3.5 h-3.5" />
+                                            <span>Join Live</span>
+                                        </button>
+                                    )}
+                                    {session.status === 'ended' && (
+                                        <button
+                                            disabled
+                                            className="flex-1 py-3 bg-slate-800 text-slate-600 font-black text-[10px] uppercase tracking-widest rounded-xl disabled:cursor-not-allowed"
+                                        >
+                                            Session Ended
+                                        </button>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
 
                 <div className="mb-8 mt-4">
                     <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase tracking-widest flex items-center gap-3">
