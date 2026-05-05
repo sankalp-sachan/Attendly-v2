@@ -40,18 +40,31 @@ const ClerkDashboard = () => {
                 const ws = wb.Sheets[wsname];
                 const parsedData = XLSX.utils.sheet_to_json(ws);
                 
-                // Validate data structure
+                // Validate and map data structure to match the specific format
                 if (parsedData.length > 0) {
-                    const requiredFields = ['name', 'email', 'rollNo', 'enrollmentNo'];
-                    const firstRow = parsedData[0];
-                    const missingFields = requiredFields.filter(f => !(f in firstRow));
+                    const mappedData = parsedData.map(row => ({
+                        name: row['STUDENT NAME'],
+                        email: row['Email Id'],
+                        rollNo: row['NO.'],
+                        enrollmentNo: row['ENROLLMENT NO.'],
+                        department: row['DEPARTMENT'] || '', // Optional
+                        section: row['SECTION'] || '', // Optional
+                        year: row['YEAR'] || '' // Optional
+                    }));
+
+                    const firstRow = mappedData[0];
+                    const missingFields = [];
+                    if (!firstRow.name) missingFields.push('STUDENT NAME');
+                    if (!firstRow.email) missingFields.push('Email Id');
+                    if (!firstRow.rollNo) missingFields.push('NO.');
+                    if (!firstRow.enrollmentNo) missingFields.push('ENROLLMENT NO.');
                     
                     if (missingFields.length > 0) {
-                        setError(`Missing required columns: ${missingFields.join(', ')}`);
+                        setError(`Missing or empty required columns: ${missingFields.join(', ')}`);
                         setData([]);
                     } else {
                         setError('');
-                        setData(parsedData);
+                        setData(mappedData);
                     }
                 }
             } catch (err) {
@@ -80,7 +93,15 @@ const ClerkDashboard = () => {
 
     const downloadTemplate = () => {
         const template = [
-            { name: 'John Doe', email: 'john@example.com', rollNo: '101', enrollmentNo: 'EN101', department: 'CS', section: 'A', year: '2024' }
+            { 
+                'STUDENT NAME': 'John Doe', 
+                'Email Id': 'john@example.com', 
+                'NO.': '101', 
+                'ENROLLMENT NO.': 'EN101', 
+                'DEPARTMENT': 'CS', 
+                'SECTION': 'A', 
+                'YEAR': '2024' 
+            }
         ];
         const ws = XLSX.utils.json_to_sheet(template);
         const wb = XLSX.utils.book_new();
@@ -288,10 +309,10 @@ const ClerkDashboard = () => {
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="bg-white/5">
-                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Name</th>
-                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Email</th>
-                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Roll No</th>
-                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Enrollment</th>
+                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Student Name</th>
+                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Email Id</th>
+                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">No.</th>
+                                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Enrollment No.</th>
                                             </tr>
                                         </thead>
                                         <tbody>
