@@ -118,13 +118,32 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const changePassword = async (currentPassword, newPassword) => {
+        try {
+            const { data } = await api.put(
+                '/users/change-password',
+                { currentPassword, newPassword }
+            );
+
+            // Update user in context to reflect mustChangePassword change
+            const updatedUser = { ...user, mustChangePassword: false };
+            setUser(updatedUser);
+            localStorage.setItem('attendly_current_user', JSON.stringify(updatedUser));
+
+            return data;
+        } catch (error) {
+            console.error("Change Password error:", error);
+            throw new Error(error.response?.data?.message || 'Password update failed');
+        }
+    };
+
     const logout = () => {
         setUser(null);
         localStorage.removeItem('attendly_current_user');
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, googleLogin, updateUserProfile, logout, deleteUser }}>
+        <AuthContext.Provider value={{ user, login, register, googleLogin, updateUserProfile, logout, deleteUser, changePassword }}>
             {children}
         </AuthContext.Provider>
     );

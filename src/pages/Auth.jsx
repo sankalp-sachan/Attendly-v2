@@ -158,34 +158,20 @@ const Auth = () => {
 
                     <div className="mb-8">
                         <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
-                            {isOnboarding ? 'Complete Profile' : (isLogin ? 'Welcome Back.' : 'Get Started.')}
+                            {isOnboarding ? 'Complete Profile' : 'Welcome Back.'}
                         </h3>
-                        {/* Tab Switcher - Compact */}
+                        {/* Tab Switcher - Compact (Removed Register tab) */}
                         {!isOnboarding && (
                             <div className="flex bg-slate-800/50 p-1 rounded-xl md:rounded-2xl mt-5 w-fit border border-white/5 relative">
                                 <button
                                     onClick={() => setIsLogin(true)}
-                                    className={`px-6 md:px-8 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all relative z-10 ${isLogin ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+                                    className={`px-6 md:px-8 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all relative z-10 text-white`}
                                 >
                                     Log In
-                                    {isLogin && (
-                                        <motion.div
-                                            layoutId="activeTab"
-                                            className="absolute inset-0 bg-primary-600 rounded-lg md:rounded-xl shadow-lg shadow-primary-500/20 z-[-1]"
-                                        />
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => setIsLogin(false)}
-                                    className={`px-6 md:px-8 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all relative z-10 ${!isLogin ? 'text-white' : 'text-slate-400 hover:text-white'}`}
-                                >
-                                    Register
-                                    {!isLogin && (
-                                        <motion.div
-                                            layoutId="activeTab"
-                                            className="absolute inset-0 bg-primary-600 rounded-lg md:rounded-xl shadow-lg shadow-primary-500/20 z-[-1]"
-                                        />
-                                    )}
+                                    <motion.div
+                                        layoutId="activeTab"
+                                        className="absolute inset-0 bg-primary-600 rounded-lg md:rounded-xl shadow-lg shadow-primary-500/20 z-[-1]"
+                                    />
                                 </button>
                             </div>
                         )}
@@ -208,33 +194,7 @@ const Auth = () => {
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
                                 <AnimatePresence mode="wait">
-                                    {!isLogin && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.95 }}
-                                            className="space-y-5 md:space-y-6"
-                                        >
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Identity</label>
-                                                <div className="relative group">
-                                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-primary-500 transition-colors" />
-                                                    <input type="text" required={!isLogin} value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" className="input-field pl-12" />
-                                                </div>
-                                            </div>
-                                            <div className="bg-slate-800/30 p-1.5 rounded-2xl md:rounded-[2rem] border border-white/5 grid grid-cols-2 gap-1.5 md:gap-2">
-                                                <button type="button" onClick={() => setRole('student')} className={`py-2.5 md:py-3 rounded-xl md:rounded-[1.5rem] text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all ${role === 'student' ? 'bg-primary-600 text-white shadow-xl shadow-primary-500/20' : 'text-slate-500 hover:text-white'}`}>Student</button>
-                                                <button type="button" onClick={() => setRole('teacher')} className={`py-2.5 md:py-3 rounded-xl md:rounded-[1.5rem] text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all ${role === 'teacher' ? 'bg-primary-600 text-white shadow-xl shadow-primary-500/20' : 'text-slate-500 hover:text-white'}`}>Teacher</button>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Academic Institute</label>
-                                                <div className="relative group">
-                                                    <School className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-primary-500 transition-colors" />
-                                                    <input type="text" required={!isLogin} value={institute} onChange={e => setInstitute(e.target.value)} placeholder="e.g. SRM University" className="input-field pl-12" />
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
+                                    {/* Registration form removed */}
                                 </AnimatePresence>
 
                                 <div className="space-y-4 md:space-y-5">

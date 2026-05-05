@@ -7,10 +7,16 @@ const Dashboard = () => {
 
     if (!user) return <Navigate to="/auth" replace />;
 
+    if (user.mustChangePassword) {
+        return <Navigate to="/change-password" replace />;
+    }
+
     switch (user.role) {
         case 'admin':
         case 'assistant_admin':
             return <Navigate to="/admin" replace />;
+        case 'clerk':
+            return <Navigate to="/clerk" replace />;
         case 'teacher':
             return <Navigate to="/teacher" replace />;
         case 'student':

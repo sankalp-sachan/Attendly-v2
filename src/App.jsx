@@ -25,6 +25,8 @@ import TeacherClassDetails from './pages/TeacherClassDetails';
 import StudentDashboard from './pages/StudentDashboard';
 import StudentClassDetails from './pages/StudentClassDetails';
 import HODDashboard from './pages/HODDashboard';
+import ClerkDashboard from './pages/ClerkDashboard';
+import ChangePassword from './pages/ChangePassword';
 
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import SplashScreen from './components/SplashScreen';
@@ -179,6 +181,26 @@ function App() {
                       <RoleRoute allowedRoles={['hod', 'admin']}>
                         <HODDashboard />
                       </RoleRoute>
+                    }
+                  />
+
+                  {/* Clerk Routes */}
+                  <Route
+                    path="/clerk"
+                    element={
+                      <RoleRoute allowedRoles={['clerk', 'admin']}>
+                        <ClerkDashboard />
+                      </RoleRoute>
+                    }
+                  />
+
+                  {/* Utility Routes */}
+                  <Route
+                    path="/change-password"
+                    element={
+                      <ProtectedRoute>
+                        <ChangePassword />
+                      </ProtectedRoute>
                     }
                   />
 
