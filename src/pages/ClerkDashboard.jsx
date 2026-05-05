@@ -40,22 +40,30 @@ const ClerkDashboard = () => {
                 const ws = wb.Sheets[wsname];
                 const parsedData = XLSX.utils.sheet_to_json(ws);
                 
-                // Validate and map data structure to match the specific format
+                // Validate and map data structure to match the specific format (case-insensitive and trimmed)
                 if (parsedData.length > 0) {
-                    const mappedData = parsedData.map(row => ({
-                        name: row['STUDENT NAME'],
-                        email: row['Email Id'],
-                        rollNo: row['NO.'],
-                        enrollmentNo: row['ENROLLMENT NO.'],
-                        department: row['DEPARTMENT'] || '', // Optional
-                        section: row['SECTION'] || '', // Optional
-                        year: row['YEAR'] || '' // Optional
-                    }));
+                    const mappedData = parsedData.map(row => {
+                        // Create a normalized version of the row keys
+                        const normalizedRow = {};
+                        Object.keys(row).forEach(key => {
+                            normalizedRow[key.trim().toUpperCase()] = row[key];
+                        });
+
+                        return {
+                            name: normalizedRow['STUDENT NAME'],
+                            email: normalizedRow['EMAIL ID'],
+                            rollNo: normalizedRow['NO.'],
+                            enrollmentNo: normalizedRow['ENROLLMENT NO.'],
+                            department: normalizedRow['DEPARTMENT'] || '',
+                            section: normalizedRow['SECTION'] || '',
+                            year: normalizedRow['YEAR'] || ''
+                        };
+                    });
 
                     const firstRow = mappedData[0];
                     const missingFields = [];
                     if (!firstRow.name) missingFields.push('STUDENT NAME');
-                    if (!firstRow.email) missingFields.push('Email Id');
+                    if (!firstRow.email) missingFields.push('EMAIL ID');
                     if (!firstRow.rollNo) missingFields.push('NO.');
                     if (!firstRow.enrollmentNo) missingFields.push('ENROLLMENT NO.');
                     
