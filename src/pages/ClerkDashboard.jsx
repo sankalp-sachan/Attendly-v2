@@ -40,32 +40,32 @@ const ClerkDashboard = () => {
                 const ws = wb.Sheets[wsname];
                 const parsedData = XLSX.utils.sheet_to_json(ws);
                 
-                // Validate and map data structure to match the specific format (case-insensitive and trimmed)
+                // Validate and map data structure with extremely flexible matching
                 if (parsedData.length > 0) {
                     const mappedData = parsedData.map(row => {
-                        // Create a normalized version of the row keys
-                        const normalizedRow = {};
-                        Object.keys(row).forEach(key => {
-                            normalizedRow[key.trim().toUpperCase()] = row[key];
-                        });
+                        const keys = Object.keys(row);
+                        const getVal = (terms) => {
+                            const key = keys.find(k => {
+                                const norm = k.trim().toUpperCase();
+                                return terms.some(t => norm.includes(t.toUpperCase()));
+                            });
+                            return key ? row[key] : null;
+                        };
 
                         return {
-                            name: normalizedRow['STUDENT NAME'],
-                            email: normalizedRow['EMAIL ID'],
-                            rollNo: normalizedRow['NO.'],
-                            enrollmentNo: normalizedRow['ENROLLMENT NO.'],
-                            department: normalizedRow['DEPARTMENT'] || '',
-                            section: normalizedRow['SECTION'] || '',
-                            year: normalizedRow['YEAR'] || ''
+                            name: getVal(['STUDENT NAME', 'NAME']),
+                            email: getVal(['EMAIL ID', 'EMAIL']),
+                            rollNo: getVal(['NO.', 'ROLL NO']),
+                            enrollmentNo: getVal(['ENROLLMENT NO.', 'ENROLLMENT']),
+                            department: getVal(['DEPARTMENT']),
+                            section: getVal(['SECTION']),
+                            year: getVal(['YEAR'])
                         };
                     });
 
-                    const firstRow = mappedData[0];
-                    const missingFields = [];
-                    if (!firstRow.enrollmentNo) missingFields.push('ENROLLMENT NO.');
-                    
-                    if (missingFields.length > 0) {
-                        setError(`Missing or empty required columns: ${missingFields.join(', ')}`);
+                    // Check if at least the first row has an enrollment number
+                    if (mappedData.length > 0 && !mappedData[0].enrollmentNo) {
+                        setError('Could not find "ENROLLMENT NO." column. Please check your Excel headers.');
                         setData([]);
                     } else {
                         setError('');
