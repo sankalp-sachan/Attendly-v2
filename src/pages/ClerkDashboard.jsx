@@ -62,9 +62,6 @@ const ClerkDashboard = () => {
 
                     const firstRow = mappedData[0];
                     const missingFields = [];
-                    if (!firstRow.name) missingFields.push('STUDENT NAME');
-                    if (!firstRow.email) missingFields.push('EMAIL ID');
-                    if (!firstRow.rollNo) missingFields.push('NO.');
                     if (!firstRow.enrollmentNo) missingFields.push('ENROLLMENT NO.');
                     
                     if (missingFields.length > 0) {
